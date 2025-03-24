@@ -17,21 +17,17 @@
  * with Aluminium Library. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include "al.h"
 
-enum al_status {
-    AL_OK = 0,
-    AL_ERROR = 1,
-    AL_NOTIMPLEMENTED = 2,
-};
+int
+al_permissions_have(const char *permission)
+{
+    (void) permission;
+    return AL_ERROR;
+}
 
-__attribute__((constructor)) void init(void);
-
-extern const char *const copyright;
-extern const char *const platform;
-const char *al_locale(void);
-const char *al_datadir(void);
-const char *al_libdir(void);
-
-int al_permissions_have(const char *);
-void al_permissions_request(const char *);
+void
+al_permissions_request(const char *permission)
+{
+    (void) permission;
+}

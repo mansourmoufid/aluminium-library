@@ -41,7 +41,8 @@ build/$(TARGET)/%.o: $(PLATFORM)/%.m
 OBJS:=	\
 	build/$(TARGET)/common.o \
 	build/$(TARGET)/dirs.o \
-	build/$(TARGET)/locale.o
+	build/$(TARGET)/locale.o \
+	build/$(TARGET)/permissions.o
 
 build/$(TARGET)/libal.dylib: $(OBJS)
 	$(CC) -bundle -o build/$(TARGET)/libal.dylib $(OBJS) $(LDFLAGS)
