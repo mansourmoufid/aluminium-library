@@ -19,21 +19,5 @@
 
 #pragma once
 
-enum al_status {
-    AL_OK = 0,
-    AL_ERROR = 1,
-    AL_NOTIMPLEMENTED = 2,
-};
-
-__attribute__((constructor)) void init(void);
-
-extern const char *const copyright;
-extern const char *const platform;
-const char *al_locale(void);
-const char *al_datadir(void);
-const char *al_libdir(void);
-
-int al_permissions_have(const char *);
-void al_permissions_request(const char *);
-
-char *al_net_get_local_ip_address(void);
+int al_android_multicast_lock_acquire(void);
+int al_android_multicast_lock_release(void);

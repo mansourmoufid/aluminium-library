@@ -42,6 +42,7 @@ OBJS:=	\
 	build/$(TARGET)/common.o \
 	build/$(TARGET)/dirs.o \
 	build/$(TARGET)/locale.o \
+	build/$(TARGET)/net.o \
 	build/$(TARGET)/permissions.o
 
 build/$(TARGET)/libal.dylib: $(OBJS)
