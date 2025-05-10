@@ -38,12 +38,27 @@ build/$(TARGET)/%.o: $(PLATFORM)/%.m
 	mkdir -p build/$(TARGET)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
+build/$(TARGET)/yuv.o: yuv.c
+	mkdir -p build/$(TARGET)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -O3 -c $< -o $@
+
+build/$(TARGET)/image.o: image.c
+	mkdir -p build/$(TARGET)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -O3 -c $< -o $@
+
+build/$(TARGET)/test-yuv: yuv.c
+	mkdir -p build/$(TARGET)
+	$(CC) $(CPPFLAGS) -DDEBUG $(CFLAGS) -O3 $< -o $@
+
 OBJS:=	\
+	build/$(TARGET)/camera.o \
 	build/$(TARGET)/common.o \
 	build/$(TARGET)/dirs.o \
+	build/$(TARGET)/image.o \
 	build/$(TARGET)/locale.o \
 	build/$(TARGET)/net.o \
-	build/$(TARGET)/permissions.o
+	build/$(TARGET)/permissions.o \
+	build/$(TARGET)/yuv.o
 
 build/$(TARGET)/libal.dylib: $(OBJS)
 	$(CC) -bundle -o build/$(TARGET)/libal.dylib $(OBJS) $(LDFLAGS)

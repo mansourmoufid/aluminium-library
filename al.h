@@ -19,10 +19,24 @@
 
 #pragma once
 
+#include <stddef.h>
+
 enum al_status {
     AL_OK = 0,
     AL_ERROR = 1,
     AL_NOTIMPLEMENTED = 2,
+};
+
+enum al_color_format {
+    AL_COLOR_FORMAT_UNKNOWN = 0,
+    AL_COLOR_FORMAT_YUV420SP = 1,
+    AL_COLOR_FORMAT_YUV420P = 2,
+    AL_COLOR_FORMAT_RGBA = 3,
+};
+
+enum al_camera_facing {
+    AL_CAMERA_FACING_FRONT = 0,
+    AL_CAMERA_FACING_BACK = 1,
 };
 
 __attribute__((constructor)) void init(void);
@@ -37,3 +51,28 @@ int al_permissions_have(const char *);
 void al_permissions_request(const char *);
 
 char *al_net_get_local_ip_address(void);
+
+struct al_camera;
+enum al_status al_camera_new(struct al_camera **, size_t, size_t, size_t);
+void al_camera_free(struct al_camera *);
+void al_camera_start(struct al_camera *);
+void al_camera_stop(struct al_camera *);
+enum al_status al_camera_get_id(struct al_camera *, const char **);
+enum al_status al_camera_get_color_format(struct al_camera *, enum al_color_format *);
+enum al_status al_camera_get_width(struct al_camera *, size_t *);
+enum al_status al_camera_get_height(struct al_camera *, size_t *);
+enum al_status al_camera_get_data(struct al_camera *, enum al_color_format, void **);
+enum al_status al_camera_get_rgba(struct al_camera *, void **);
+enum al_status al_camera_get_facing(struct al_camera *, enum al_camera_facing *);
+enum al_status al_camera_get_orientation(struct al_camera *, int *);
+enum al_status al_camera_set_stride(struct al_camera *, size_t);
+
+struct al_image {
+    size_t width;
+    size_t height;
+    size_t stride;
+    void *restrict data;
+    enum al_color_format format;
+};
+enum al_status al_image_convert(struct al_image *, struct al_image *);
+enum al_status al_image_rotate(struct al_image *, struct al_image *, int);
