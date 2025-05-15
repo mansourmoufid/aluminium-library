@@ -50,6 +50,8 @@ const char *al_libdir(void);
 int al_permissions_have(const char *);
 void al_permissions_request(const char *);
 
+int al_display_orientation(void);
+
 char *al_net_get_local_ip_address(void);
 
 struct al_camera;

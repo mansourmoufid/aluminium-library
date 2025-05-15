@@ -54,6 +54,7 @@ OBJS:=	\
 	build/$(TARGET)/camera.o \
 	build/$(TARGET)/common.o \
 	build/$(TARGET)/dirs.o \
+	build/$(TARGET)/display.o \
 	build/$(TARGET)/image.o \
 	build/$(TARGET)/locale.o \
 	build/$(TARGET)/net.o \
