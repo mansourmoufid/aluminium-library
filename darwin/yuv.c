@@ -33,6 +33,8 @@
 
 // typedef unsigned long vImagePixelCount;
 #define VIMAGEPIXELCOUNT_MAX ((vImagePixelCount) ULLONG_MAX)
+#define VIMAGEPIXELCOUNT_MAX_SQRT \
+    (((vImagePixelCount) 1) << (8 * sizeof(vImagePixelCount) / 2))
 
 enum al_status
 _al_darwin_yuv_to_rgba(
@@ -52,8 +54,8 @@ _al_darwin_yuv_to_rgba(
     vImagePixelCount width = (vImagePixelCount) size.width;
     // DEBUG("height = %lu", height);
     // DEBUG("width = %lu", width);
-    assert(height <= VIMAGEPIXELCOUNT_MAX);
-    assert(width <= VIMAGEPIXELCOUNT_MAX);
+    assert(height < VIMAGEPIXELCOUNT_MAX_SQRT);
+    assert(width < VIMAGEPIXELCOUNT_MAX_SQRT);
 
     if (image_buffers[RGBA].data == NULL) {
         vImage_Error error = vImageBuffer_Init(
