@@ -32,6 +32,61 @@
 
 #include "al.h"
 
+enum al_status
+al_image_alloc(struct al_image *x)
+{
+    assert(x != NULL);
+    if (!(x->width > 0 && x->height > 0))
+        return AL_ERROR;
+    if (!(x->stride >= x->width))
+        return AL_ERROR;
+    switch (x->format) {
+        case AL_COLOR_FORMAT_YUV420SP:
+        case AL_COLOR_FORMAT_YUV420P:
+        case AL_COLOR_FORMAT_RGBA:
+            break;
+        case AL_COLOR_FORMAT_UNKNOWN:
+            return AL_ERROR;
+    }
+    if (x->data != NULL) {
+        free(x->data);
+        x->data = NULL;
+    }
+    size_t size = 0;
+    switch (x->format) {
+        case AL_COLOR_FORMAT_YUV420SP:
+        case AL_COLOR_FORMAT_YUV420P:
+            size = x->stride * x->height * 3 / 2 * sizeof (uint8_t);
+            break;
+        case AL_COLOR_FORMAT_RGBA:
+            size = x->stride * x->height * sizeof (uint32_t);
+            break;
+        case AL_COLOR_FORMAT_UNKNOWN:
+            abort();
+    }
+    assert(size > 0);
+    void *data = NULL;
+    if (posix_memalign(&data, sizeof (void *), size) != 0) {
+        DEBUG("posix_memalign: errno=%i [%s]", errno, strerror(errno));
+        return AL_ERROR;
+    }
+    x->data = data;
+    return AL_OK;
+}
+
+void
+al_image_free(struct al_image *x)
+{
+    assert(x != NULL);
+    x->width = 0;
+    x->height = 0;
+    x->stride = 0;
+    if (x->data != NULL)
+        free(x->data);
+    x->data = NULL;
+    x->format = AL_COLOR_FORMAT_UNKNOWN;
+}
+
 struct yuv {
     size_t width;
     size_t height;

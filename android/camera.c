@@ -280,26 +280,9 @@ process_image(struct al_camera *cam, AImage *image)
         default:
             break;
     }
-    if (cam->image.data == NULL) {
-        size_t m = 0;
-        size_t n = 0;
-        switch (cam->image.format) {
-            case AL_COLOR_FORMAT_YUV420P:
-            case AL_COLOR_FORMAT_YUV420SP:
-                m = cam->image.stride * cam->image.height * 3 / 2;
-                n = sizeof (uint8_t);
-                break;
-            case AL_COLOR_FORMAT_RGBA:
-                m = cam->image.stride * cam->image.height;
-                n = sizeof (uint32_t);
-                break;
-            case AL_COLOR_FORMAT_UNKNOWN:
-                break;
-        }
-        cam->image.data = calloc(m, n);
-        assert(cam->image.data != NULL);
-    }
-    int rotate = 0;
+
+    enum al_status status2 = al_image_alloc(&cam->image);
+    assert(status2 == AL_OK);
     switch (cam->color_format) {
         case COLOR_FormatYUV420Planar:
             al_image_rotate(
