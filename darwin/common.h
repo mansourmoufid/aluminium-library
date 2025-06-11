@@ -42,13 +42,15 @@
 #if defined(NDEBUG)
 #define DEBUG(...) 
 #else
-// #define DEBUG(...) os_log_debug(OS_LOG_DEFAULT, __VA_ARGS__)
-// #define DEBUG(...) fprintf(stderr, __VA_ARGS__), fprintf(stderr, "\n")
 #define DEBUG(...) { \
-    if (isatty(STDERR_FILENO) != 0) \
-        fprintf(stderr, __VA_ARGS__), fprintf(stderr, "\n"); \
-    else \
+    if (isatty(STDERR_FILENO) != 0) { \
+        fprintf(stderr, "%s: ", __func__); \
+        fprintf(stderr, __VA_ARGS__); \
+        fprintf(stderr, "\n"); \
+    } else { \
+        os_log_debug(OS_LOG_DEFAULT, "%s: ", __func__); \
         os_log_debug(OS_LOG_DEFAULT, __VA_ARGS__); \
+    } \
 }
 #endif
 
