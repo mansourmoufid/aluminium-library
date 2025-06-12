@@ -107,9 +107,10 @@ static inline
 void
 _al_dump(struct al_image *x)
 {
+    uint8_t *data = x->data;
     for (size_t i = 0; i < x->height; i++) {
         for (size_t j = 0; j < x->width; j++) {
-            printf("\t%i", x->data[i * x->width + j]);
+            printf("\t%i", data[i * x->width + j]);
         }
         printf("\n");
     }
@@ -212,7 +213,7 @@ al_image_rotate(struct al_image *src, struct al_image *dst, int degrees)
         case AL_COLOR_FORMAT_YUV420P:
         case AL_COLOR_FORMAT_RGBA:
         case AL_COLOR_FORMAT_UNKNOWN:
-            break;
+            return AL_NOTIMPLEMENTED;
     }
 
     return AL_OK;
