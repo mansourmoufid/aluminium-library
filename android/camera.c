@@ -886,7 +886,7 @@ al_camera_new(
         default:
             break;
     }
-    // (*cam)->image.stride = _al_calc_next_multiple((*cam)->width, 16);
+    // (*cam)->image.stride = _al_calc_next_multiple((*cam)->width, 32);
     (*cam)->image.stride = (*cam)->width;
 
     return AL_OK;

@@ -425,7 +425,7 @@ process_image(struct al_camera *cam, CVImageBufferRef image)
     }
     if (y_stride < width)
         goto error2;
-    // cam->image.stride = _al_calc_next_multiple(width, sizeof (void *));
+    // cam->image.stride = _al_calc_next_multiple(width, 32);
     cam->image.stride = y_stride;
 
     OSType format = CVPixelBufferGetPixelFormatType(pixel_buffer);

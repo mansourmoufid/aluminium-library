@@ -43,7 +43,7 @@ al_image_alloc(struct al_image *x)
     if (!(x->height < SIZE_MAX_SQRT && x->stride < SIZE_MAX_SQRT))
         return AL_ERROR;
     if (x->stride == 0)
-        x->stride = _al_calc_next_multiple(x->width, sizeof (void *));
+        x->stride = _al_calc_next_multiple(x->width, 32);
     if (!(x->stride >= x->width))
         return AL_ERROR;
     switch (x->format) {
@@ -72,7 +72,7 @@ al_image_alloc(struct al_image *x)
     }
     assert(size > 0);
     void *data = NULL;
-    if (posix_memalign(&data, sizeof (void *), size) != 0) {
+    if (posix_memalign(&data, 32, size) != 0) {
         DEBUG("posix_memalign: errno=%i [%s]", errno, strerror(errno));
         return AL_ERROR;
     }
