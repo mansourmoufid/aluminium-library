@@ -24,14 +24,15 @@
 #include <assert.h>
 #include <errno.h>
 #include <stddef.h>
-#include <stdlib.h> // calloc
-#include <string.h> // memmove
+#include <stdlib.h> // abort, calloc, posix_memalign
+#include <string.h> // memcpy, memmove, strerror
 #if defined(DEBUG)
 #include <stdio.h>
 #endif
 
 #include "al.h"
 #include "arithmetic.h" // _al_calc_next_multiple, SIZE_MAX_SQRT
+#include "common.h"
 
 enum al_status
 al_image_alloc(struct al_image *x)
@@ -215,6 +216,66 @@ al_image_rotate(struct al_image *src, struct al_image *dst, int degrees)
     }
 
     return AL_OK;
+}
+
+static inline
+enum al_status
+_copy_yuv420sp(struct al_image *src, struct al_image *dst)
+{
+    assert(src != NULL);
+    assert(dst != NULL);
+    if (src->data == NULL || dst->data == NULL)
+        return AL_ERROR;
+    uint8_t *src_data = src->data;
+    uint8_t *dst_data = dst->data;
+    memcpy(
+        dst->data,
+        src->data,
+        src->height * src->stride
+    );
+    memcpy(
+        &(dst_data[dst->height * dst->stride]),
+        &(src_data[src->height * src->stride]),
+        (src->height / 2) * src->stride * sizeof (uint8_t)
+    );
+    return AL_OK;
+}
+
+static inline
+enum al_status
+_copy_rgba(struct al_image *src, struct al_image *dst)
+{
+    assert(src != NULL);
+    assert(dst != NULL);
+    if (src->data == NULL || dst->data == NULL)
+        return AL_ERROR;
+    uint8_t *src_data = src->data;
+    uint8_t *dst_data = dst->data;
+    for (size_t i = 0; i < src->height; i++) {
+        memcpy(
+            &(dst_data[i * dst->stride]),
+            &(src_data[i * src->stride]),
+            dst->width * sizeof (uint32_t)
+        );
+    }
+    return AL_OK;
+}
+
+enum al_status
+al_image_copy(struct al_image *src, struct al_image *dst)
+{
+    assert(src != NULL);
+    assert(dst != NULL);
+    assert(src->format == dst->format);
+    switch (src->format) {
+        case AL_COLOR_FORMAT_RGBA:
+            return _copy_rgba(src, dst);
+        case AL_COLOR_FORMAT_YUV420SP:
+            return _copy_yuv420sp(src, dst);
+        case AL_COLOR_FORMAT_YUV420P:
+        case AL_COLOR_FORMAT_UNKNOWN:
+            return AL_NOTIMPLEMENTED;
+    }
 }
 
 #if defined(DEBUG)
