@@ -31,6 +31,7 @@
 #endif
 
 #include "al.h"
+#include "arithmetic.h" // _al_calc_next_multiple, SIZE_MAX_SQRT
 
 enum al_status
 al_image_alloc(struct al_image *x)
@@ -38,6 +39,10 @@ al_image_alloc(struct al_image *x)
     assert(x != NULL);
     if (!(x->width > 0 && x->height > 0))
         return AL_ERROR;
+    if (!(x->height < SIZE_MAX_SQRT && x->stride < SIZE_MAX_SQRT))
+        return AL_ERROR;
+    if (x->stride == 0)
+        x->stride = _al_calc_next_multiple(x->width, sizeof (void *));
     if (!(x->stride >= x->width))
         return AL_ERROR;
     switch (x->format) {

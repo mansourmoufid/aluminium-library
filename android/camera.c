@@ -46,8 +46,9 @@
 
 #include "al.h"
 
-#include "common.h" // DEBUG, DEBUG_AMEDIA, COLOR_Format*
+#include "arithmetic.h" // _al_calc_next_multiple
 #include "camera.h" // DEBUG_ACAMERA
+#include "common.h" // DEBUG, DEBUG_AMEDIA, COLOR_Format*
 #include "video.h"
 #include "yuv.h"
 
@@ -885,7 +886,7 @@ al_camera_new(
         default:
             break;
     }
-    // (*cam)->image.stride = (((*cam)->width / 16) + 1) * 16;
+    // (*cam)->image.stride = _al_calc_next_multiple((*cam)->width, 16);
     (*cam)->image.stride = (*cam)->width;
 
     return AL_OK;
