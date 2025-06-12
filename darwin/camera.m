@@ -23,7 +23,8 @@
 #include <math.h> // sqrtf
 #include <stdbool.h>
 #include <stddef.h>
-#include <stdlib.h> // calloc
+#include <stdint.h>
+#include <stdlib.h> // calloc, free
 #include <string.h> // strerror
 
 #include <dispatch/dispatch.h> // dispatch_queue_t
@@ -41,6 +42,8 @@
 #import <Foundation/NSObjCRuntime.h> // NSLog, NSUIntegerMax
 #import <Foundation/NSValue.h> // NSNumber
 
+#include <CoreGraphics/CGGeometry.h> // CGSize
+
 #import <CoreMedia/CMSampleBuffer.h> // CMSampleBufferRef
 // typedef struct opaqueCMSampleBuffer *CMSampleBufferRef;
 typedef const struct opaqueCMSampleBuffer *ConstCMSampleBufferRef;
@@ -57,8 +60,10 @@ typedef const struct opaqueCMSampleBuffer *ConstCMSampleBufferRef;
 
 #include "al.h"
 
-#include "common.h"
+#include "arithmetic.h"
 #include "camera.h"
+#include "common.h"
+#include "yuv.h"
 
 struct al_camera {
     AlCameraController *controller;
@@ -71,9 +76,14 @@ struct al_camera {
     CMSampleBufferRef sample_buffer;
     CVImageBufferRef image_buffer;
     OSType pixel_format;
-    struct al_image image;
     size_t width;
     size_t height;
+    size_t stride;
+    vImage_Buffer image_buffers[4];
+    struct al_image image;
+    struct al_image rgba;
+    volatile bool read;
+    volatile bool stop;
 };
 
 @interface AlCameraController : NSObject
@@ -318,10 +328,12 @@ new_output(struct al_camera *cam)
         DEBUG("    %s", _cv_pixel_format_string([fmt unsignedIntValue]));
     }
     NSMutableArray<NSNumber *> *preferred = [NSMutableArray arrayWithArray:@[
-        [NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8Planar],
-        [NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8PlanarFullRange],
+        // [NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8Planar],
+        // [NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8PlanarFullRange],
         [NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange],
         [NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarFullRange],
+        // [NSNumber numberWithInt:kCVPixelFormatType_32ARGB],
+        // [NSNumber numberWithInt:kCVPixelFormatType_32BGRA],
     ]];
     for (NSNumber *fmt in [preferred reverseObjectEnumerator]) {
         if ([available containsObject:fmt] != YES)
@@ -333,15 +345,7 @@ new_output(struct al_camera *cam)
     }
     [available release];
     [output setVideoSettings:@{
-        (__bridge NSString *) kCVPixelBufferPixelFormatTypeKey: preferred,
-        /*
-        (__bridge NSString *) kCVPixelBufferPixelFormatTypeKey: @[
-            [NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8Planar],
-            [NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8PlanarFullRange],
-            [NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange],
-            [NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarFullRange],
-        ],
-        */
+        (__bridge NSString *) kCVPixelBufferPixelFormatTypeKey: preferred
     }];
     [preferred release];
     return output;
@@ -351,28 +355,87 @@ static
 void
 process_image(struct al_camera *cam, CVImageBufferRef image)
 {
-    assert(cam != NULL);
-    assert(image != NULL);
+    enum al_status status;
 
-    // CGSize size = CVImageBufferGetEncodedSize(image);
-    // cam->image.width = (size_t) size.width;
-    // cam->image.height = (size_t) size.height;
+    assert(cam != NULL);
+
+    if (image == NULL)
+        goto error0;
 
     assert(CFGetTypeID(image) == CVPixelBufferGetTypeID());
     CVPixelBufferRef pixel_buffer = image;
-    if (pixel_buffer == NULL)
-        goto error0;
     CVPixelBufferRetain(pixel_buffer);
 
     CVPixelBufferLockFlags lock = kCVPixelBufferLock_ReadOnly;
-    CVReturn status = CVPixelBufferLockBaseAddress(pixel_buffer, lock);
-    if (status != kCVReturnSuccess) {
-        DEBUG_CV("CVPixelBufferLockBaseAddress", status);
+    CVReturn lock_status = CVPixelBufferLockBaseAddress(pixel_buffer, lock);
+    if (lock_status != kCVReturnSuccess) {
+        DEBUG_CV("CVPixelBufferLockBaseAddress", lock_status);
         goto error1;
     }
 
+    CGSize size = CVImageBufferGetEncodedSize(image);
+    vImagePixelCount w = (vImagePixelCount) size.width;
+    vImagePixelCount h = (vImagePixelCount) size.height;
+    // DEBUG("width = %lu", w);
+    // DEBUG("height = %lu", h);
+    if (w == 0 || h == 0)
+        goto error2;
+    size_t width = (size_t) w;
+    size_t height = (size_t) h;
+    cam->image.width = width;
+    cam->image.height = height;
+
+    Boolean planar = CVPixelBufferIsPlanar(pixel_buffer);
+    /*
+    DEBUG(
+        "CVPixelBufferIsPlanar(%p) == %s",
+        (void *) pixel_buffer,
+        planar ? "true" : "false"
+    );
+    */
+    size_t y_stride = 0;
+    if (planar) {
+        y_stride = CVPixelBufferGetBytesPerRowOfPlane(pixel_buffer, 0);
+        /*
+        DEBUG(
+            "CVPixelBufferGetBytesPerRowOfPlane(%p, 0) = %zu",
+            (void *) pixel_buffer,
+            y_stride
+        );
+        DEBUG(
+            "CVPixelBufferGetBytesPerRowOfPlane(%p, 1) = %zu",
+            (void *) pixel_buffer,
+            CVPixelBufferGetBytesPerRowOfPlane(pixel_buffer, 1)
+        );
+        */
+        if (!(
+            CVPixelBufferGetBytesPerRowOfPlane(pixel_buffer, 0) ==
+            CVPixelBufferGetBytesPerRowOfPlane(pixel_buffer, 1)
+        ))
+            goto error2;
+    } else {
+        y_stride = CVPixelBufferGetBytesPerRow(pixel_buffer);
+        /*
+        DEBUG(
+            "CVPixelBufferGetBytesPerRow(%p) = %zu",
+            (void *) pixel_buffer,
+            y_stride
+        );
+        */
+    }
+    if (y_stride < width)
+        goto error2;
+    // cam->image.stride = _al_calc_next_multiple(width, sizeof (void *));
+    cam->image.stride = y_stride;
+
     OSType format = CVPixelBufferGetPixelFormatType(pixel_buffer);
-    // DEBUG("%s", _cv_pixel_format_string(format));
+    /*
+    DEBUG(
+        "CVPixelBufferGetPixelFormatType(%p) = %s",
+        (void *) pixel_buffer,
+        _cv_pixel_format_string(format)
+    );
+    */
     cam->pixel_format = format;
     switch (cam->pixel_format) {
         case kCVPixelFormatType_420YpCbCr8Planar:
@@ -383,55 +446,126 @@ process_image(struct al_camera *cam, CVImageBufferRef image)
         case kCVPixelFormatType_420YpCbCr8BiPlanarFullRange:
             cam->image.format = AL_COLOR_FORMAT_YUV420SP;
             break;
+        case kCVPixelFormatType_32ARGB:
         case kCVPixelFormatType_32BGRA:
             cam->image.format = AL_COLOR_FORMAT_RGBA;
             break;
         default:
             DEBUG("%s", _cv_pixel_format_string(cam->pixel_format));
             cam->image.format = AL_COLOR_FORMAT_UNKNOWN;
-            break;
-    }
-    // .. .
-    switch (cam->image.format) {
-        case AL_COLOR_FORMAT_YUV420P:
-            break;
-        case AL_COLOR_FORMAT_YUV420SP:
-            break;
-        case AL_COLOR_FORMAT_RGBA:
-        case AL_COLOR_FORMAT_UNKNOWN:
             goto error2;
     }
 
-#if defined(TARGET_OS_OSX) && TARGET_OS_OSX
-    CGColorSpaceRef color_space = CVImageBufferGetColorSpace(pixel_buffer);
-#endif
+    status = al_image_alloc(&cam->image);
+    if (status != AL_OK)
+        goto error2;
 
-    Boolean planar = CVPixelBufferIsPlanar(pixel_buffer);
-    if (planar) {
-        size_t width = CVPixelBufferGetWidth(pixel_buffer);
-        size_t height = CVPixelBufferGetHeight(pixel_buffer);
-        size_t stride = CVPixelBufferGetBytesPerRow(pixel_buffer);
-        void *data = CVPixelBufferGetBaseAddress(pixel_buffer);
-        assert(data != NULL);
-        cam->image.width = width;
-        cam->image.height = height;
-    } else {
-        size_t n = CVPixelBufferGetPlaneCount(pixel_buffer);
-        size_t i = 0;
-        void *y = CVPixelBufferGetBaseAddressOfPlane(pixel_buffer, i);
-        assert(y != NULL);
-        size_t width = CVPixelBufferGetWidthOfPlane(pixel_buffer, i);
-        size_t height = CVPixelBufferGetHeightOfPlane(pixel_buffer, i);
-        size_t stride = CVPixelBufferGetBytesPerRowOfPlane(pixel_buffer, i);
-        cam->image.width = width;
-        cam->image.height = height;
+    switch (cam->pixel_format) {
+        case kCVPixelFormatType_420YpCbCr8Planar:
+        case kCVPixelFormatType_420YpCbCr8PlanarFullRange:
+            status = al_image_copy(
+                &((struct al_image) {
+                    .width = width,
+                    .height = height,
+                    .stride = y_stride,
+                    .data = CVPixelBufferGetBaseAddressOfPlane(
+                        pixel_buffer,
+                        0
+                    ),
+                    .format = AL_COLOR_FORMAT_YUV420P,
+                }),
+                &cam->image
+            );
+            if (status != AL_OK)
+                goto error3;
+            break;
+        case kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange:
+        case kCVPixelFormatType_420YpCbCr8BiPlanarFullRange:
+            status = al_image_copy(
+                &((struct al_image) {
+                    .width = width,
+                    .height = height,
+                    .stride = y_stride,
+                    .data = CVPixelBufferGetBaseAddressOfPlane(
+                        pixel_buffer,
+                        0
+                    ),
+                    .format = AL_COLOR_FORMAT_YUV420SP,
+                }),
+                &cam->image
+            );
+            if (status != AL_OK)
+                goto error3;
+            break;
+        case kCVPixelFormatType_32ARGB:
+        case kCVPixelFormatType_32BGRA:
+            status = al_image_copy(
+                &((struct al_image) {
+                    .width = width,
+                    .height = height,
+                    .stride = y_stride,
+                    .data = CVPixelBufferGetBaseAddress(pixel_buffer),
+                    .format = AL_COLOR_FORMAT_RGBA,
+                }),
+                &cam->image
+            );
+            if (status != AL_OK)
+                goto error3;
+            break;
     }
 
-error:
+    if (cam->image.format == AL_COLOR_FORMAT_RGBA) {
+        cam->rgba.width = cam->image.width;
+        cam->rgba.height = cam->image.height;
+        cam->rgba.stride = cam->image.stride;
+        cam->rgba.format = cam->image.format;
+        status = al_image_alloc(&cam->rgba);
+        if (status != AL_OK)
+            goto error4;
+        status = al_image_copy(&cam->image, &cam->rgba);
+        if (status != AL_OK)
+            goto error4;
+    } else {
+        status = _al_darwin_yuv_to_rgba(image, cam->image_buffers);
+        if (status != AL_OK)
+            goto error4;
+        cam->rgba.width = cam->image_buffers[RGBA].width;
+        cam->rgba.height = cam->image_buffers[RGBA].height;
+        cam->rgba.stride = cam->image_buffers[RGBA].rowBytes;
+        cam->rgba.format = AL_COLOR_FORMAT_RGBA;
+        status = al_image_alloc(&cam->rgba);
+        if (status != AL_OK)
+            goto error4;
+        status = al_image_copy(
+            &((struct al_image) {
+                .width = cam->image_buffers[RGBA].width,
+                .height = cam->image_buffers[RGBA].height,
+                .stride = cam->image_buffers[RGBA].rowBytes,
+                .data = cam->image_buffers[RGBA].data,
+                .format = AL_COLOR_FORMAT_RGBA,
+            }),
+            &cam->rgba
+        );
+        if (status != AL_OK)
+            goto error4;
+    }
+
+    cam->read = true;
+    lock_status = CVPixelBufferUnlockBaseAddress(pixel_buffer, lock);
+    if (lock_status != kCVReturnSuccess) {
+        DEBUG_CV("CVPixelBufferUnlockBaseAddress", lock_status);
+    }
+    CVPixelBufferRelease(pixel_buffer);
+    return;
+
+error4:
+    al_image_free(&cam->rgba);
+error3:
+    al_image_free(&cam->image);
 error2:
-    status = CVPixelBufferUnlockBaseAddress(pixel_buffer, lock);
-    if (status != kCVReturnSuccess) {
-        DEBUG_CV("CVPixelBufferUnlockBaseAddress", status);
+    lock_status = CVPixelBufferUnlockBaseAddress(pixel_buffer, lock);
+    if (lock_status != kCVReturnSuccess) {
+        DEBUG_CV("CVPixelBufferUnlockBaseAddress", lock_status);
     }
 error1:
     CVPixelBufferRelease(pixel_buffer);
@@ -474,6 +608,10 @@ error0:
 {
     // DEBUG("didOutputSampleBuffer: %p", sampleBuffer);
     if (sampleBuffer == NULL)
+        return;
+    if (self.camera == NULL)
+        return;
+    if (self.camera->stop)
         return;
     if (self.camera->sample_buffer != NULL)
         CFRelease(self.camera->sample_buffer);
@@ -654,6 +792,8 @@ al_camera_free(struct al_camera *cam)
     if (cam->sample_buffer != NULL)
         CFRelease(cam->sample_buffer);
     cam->sample_buffer = NULL;
+    al_image_free(&cam->image);
+    al_image_free(&cam->rgba);
     if (cam->output_delegate != nil)
         [cam->output_delegate release];
     cam->output_delegate = nil;
@@ -691,15 +831,18 @@ al_camera_start(struct al_camera *cam)
     assert(cam != NULL);
     assert(cam->session != nil);
     [cam->session startRunning];
+    cam->stop = false;
 }
 
 void
 al_camera_stop(struct al_camera *cam)
 {
     assert(cam != NULL);
-    assert(cam->session != nil);
-    if ([cam->session isRunning])
-        [cam->session stopRunning];
+    cam->stop = true;
+    if (cam->session != nil) {
+        if ([cam->session isRunning])
+            [cam->session stopRunning];
+    }
 }
 
 enum al_status
@@ -754,7 +897,13 @@ al_camera_get_rgba(struct al_camera *cam, void **data)
 {
     assert(cam != NULL);
     assert(data != NULL);
-    return AL_NOTIMPLEMENTED;
+    if (!cam->read) {
+        *data = NULL;
+        return AL_OK;
+    }
+    cam->read = false;
+    *data = cam->rgba.data;
+    return AL_OK;
 }
 
 enum al_status
@@ -776,5 +925,7 @@ al_camera_get_orientation(struct al_camera *cam, int *orientation)
 enum al_status
 al_camera_set_stride(struct al_camera *cam, size_t stride)
 {
+    assert(cam != NULL);
+    (void) stride;
     return AL_NOTIMPLEMENTED;
 }
