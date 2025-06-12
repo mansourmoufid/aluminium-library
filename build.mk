@@ -19,6 +19,7 @@ CFLAGS+=        --target=$(TARGET)
 CFLAGS+=        -mtune=generic
 
 ASFLAGS+=       -fintegrated-as
+CPPFLAGS+=      -D_POSIX_C_SOURCE=200809L
 CPPFLAGS+=      -D_FORTIFY_SOURCE=1
 CFLAGS+=        -std=c11
 CFLAGS+=        -fno-builtin
