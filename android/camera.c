@@ -49,7 +49,7 @@
 #include "arithmetic.h" // _al_calc_next_multiple
 #include "camera.h" // DEBUG_ACAMERA
 #include "common.h" // DEBUG, DEBUG_AMEDIA, COLOR_Format*
-#include "video.h"
+#include "mediacodec.h"
 #include "yuv.h"
 
 struct metadata {
