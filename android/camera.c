@@ -286,7 +286,7 @@ process_image(struct al_camera *cam, AImage *image)
     assert(status2 == AL_OK);
     switch (cam->color_format) {
         case COLOR_FormatYUV420Planar:
-            al_image_rotate(
+            status2 = al_image_copy(
                 &((struct al_image) {
                     .width = cam->width,
                     .height = cam->height,
@@ -294,12 +294,12 @@ process_image(struct al_camera *cam, AImage *image)
                     .data = cam->yuv420p,
                     .format = AL_COLOR_FORMAT_YUV420P,
                 }),
-                &cam->image,
-                rotate
+                &cam->image
             );
+            assert(status2 == AL_OK);
             break;
         case COLOR_FormatYUV420SemiPlanar:
-            al_image_rotate(
+            status2 = al_image_copy(
                 &((struct al_image) {
                     .width = cam->width,
                     .height = cam->height,
@@ -307,9 +307,9 @@ process_image(struct al_camera *cam, AImage *image)
                     .data = cam->yuv420sp,
                     .format = AL_COLOR_FORMAT_YUV420SP,
                 }),
-                &cam->image,
-                rotate
+                &cam->image
             );
+            assert(status2 == AL_OK);
             break;
         default:
             break;
