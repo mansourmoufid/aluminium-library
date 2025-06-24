@@ -31,6 +31,7 @@ so:
 
 .PHONY: install-so
 install-so: so
+	mkdir -p $(DESTDIR)$(PREFIX)/lib/$(ABI)
 	install $(MAKEDIR)/../build/$(TARGET)/*.so $(DESTDIR)$(PREFIX)/lib/$(ABI)/
 
 .PHONY: install

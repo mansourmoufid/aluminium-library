@@ -80,6 +80,7 @@ LIBDIR?=	lib
 
 .PHONY: install
 install:
+	mkdir -p $(DESTDIR)$(PREFIX)/$(LIBDIR)
 	install build/$(TARGET)/libal$(SOEXT) $(DESTDIR)$(PREFIX)/$(LIBDIR)
 
 .PHONY: check
