@@ -19,6 +19,7 @@
 
 #include <assert.h>
 #include <limits.h> // UINT8_MAX, ULLONG_MAX
+#include <stdint.h>
 #include <stdlib.h> // free
 
 #include <Accelerate/Accelerate.h> // vImage_Buffer

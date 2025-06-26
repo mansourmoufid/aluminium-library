@@ -332,8 +332,8 @@ new_output(struct al_camera *cam)
         // [NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8PlanarFullRange],
         [NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange],
         [NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarFullRange],
-        // [NSNumber numberWithInt:kCVPixelFormatType_32ARGB],
-        // [NSNumber numberWithInt:kCVPixelFormatType_32BGRA],
+        [NSNumber numberWithInt:kCVPixelFormatType_32ARGB],
+        [NSNumber numberWithInt:kCVPixelFormatType_32BGRA],
     ]];
     for (NSNumber *fmt in [preferred reverseObjectEnumerator]) {
         if ([available containsObject:fmt] != YES)
@@ -349,6 +349,30 @@ new_output(struct al_camera *cam)
     }];
     [preferred release];
     return output;
+}
+
+static inline
+uint32_t
+argb_to_rgba(uint32_t x)
+{
+    // BBGGRRAA → AABBGGRR
+    return (
+        ((x & 0xffffff00) >> 8) |
+        ((x & 0x000000ff) << 24)
+    );
+}
+
+static inline
+uint32_t
+bgra_to_rgba(uint32_t x)
+{
+    // AARRGGBB → AABBGGRR
+    return (
+        ((x & 0xff000000)) |
+        ((x & 0x00ff0000) >> 16) |
+        ((x & 0x0000ff00)) |
+        ((x & 0x000000ff) << 16)
+    );
 }
 
 static
@@ -446,6 +470,7 @@ process_image(struct al_camera *cam, CVImageBufferRef image)
         case kCVPixelFormatType_420YpCbCr8BiPlanarFullRange:
             cam->image.format = AL_COLOR_FORMAT_YUV420SP;
             break;
+        case kCVPixelFormatType_32RGBA:
         case kCVPixelFormatType_32ARGB:
         case kCVPixelFormatType_32BGRA:
             cam->image.format = AL_COLOR_FORMAT_RGBA;
@@ -497,6 +522,7 @@ process_image(struct al_camera *cam, CVImageBufferRef image)
             if (status != AL_OK)
                 goto error3;
             break;
+        case kCVPixelFormatType_32RGBA:
         case kCVPixelFormatType_32ARGB:
         case kCVPixelFormatType_32BGRA:
             status = al_image_copy(
@@ -525,6 +551,38 @@ process_image(struct al_camera *cam, CVImageBufferRef image)
         status = al_image_copy(&cam->image, &cam->rgba);
         if (status != AL_OK)
             goto error4;
+        switch (format) {
+            case kCVPixelFormatType_32RGBA:
+                break;
+            case kCVPixelFormatType_32ARGB:
+                {
+                uint32_t *const data = cam->rgba.data;
+                const size_t h = cam->rgba.height;
+                const size_t w = cam->rgba.width;
+                const size_t s = cam->rgba.stride / sizeof (uint32_t);
+                for (size_t i = 0; i < h; i++) {
+                    for (size_t j = 0; j < w; j++) {
+                        data[i * s + j] = argb_to_rgba(data[i * s + j]);
+                    }
+                }
+                }
+                break;
+            case kCVPixelFormatType_32BGRA:
+                {
+                uint32_t *const data = cam->rgba.data;
+                const size_t h = cam->rgba.height;
+                const size_t w = cam->rgba.width;
+                const size_t s = cam->rgba.stride / sizeof (uint32_t);
+                for (size_t i = 0; i < h; i++) {
+                    for (size_t j = 0; j < w; j++) {
+                        data[i * s + j] = bgra_to_rgba(data[i * s + j]);
+                    }
+                }
+                }
+                break;
+            default:
+                goto error4;
+        }
     } else {
         status = _al_darwin_yuv_to_rgba(image, cam->image_buffers);
         if (status != AL_OK)

@@ -29,7 +29,7 @@
 static const OSType color_formats[] = {
     [AL_COLOR_FORMAT_YUV420P] = kCVPixelFormatType_420YpCbCr8Planar,
     [AL_COLOR_FORMAT_YUV420SP] = kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange,
-    [AL_COLOR_FORMAT_RGBA] = kCVPixelFormatType_32BGRA,
+    [AL_COLOR_FORMAT_RGBA] = kCVPixelFormatType_32RGBA,
 };
 
 enum image_buffer_index {
