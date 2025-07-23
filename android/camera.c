@@ -60,6 +60,7 @@ struct metadata {
 };
 
 struct al_camera {
+    size_t index;
     ACameraManager *manager;
     ACameraDevice *device;
     char *id;
@@ -85,6 +86,9 @@ struct al_camera {
     volatile bool read;
     volatile bool stop;
 };
+
+#define N_CAMERAS 64
+static struct al_camera *_al_cameras[N_CAMERAS] = {0};
 
 static
 void
@@ -796,6 +800,10 @@ al_camera_new(
         goto error0;
     }
 
+    (*cam)->index = index;
+    if (index < N_CAMERAS)
+        _al_cameras[index] = *cam;
+
     errno = 0;
     (*cam)->availability_callbacks = calloc(
         1,
@@ -981,6 +989,8 @@ al_camera_free(struct al_camera *cam)
     cam->manager = NULL;
     free(cam->availability_callbacks);
     cam->availability_callbacks = NULL;
+    if (cam->index < N_CAMERAS)
+        _al_cameras[cam->index] = NULL;
     free(cam);
 }
 
@@ -1346,4 +1356,14 @@ al_camera_set_stride(struct al_camera *cam, size_t stride)
         cam->image.stride = stride;
     }
     return AL_OK;
+}
+
+void
+al_camera_cleanup(void)
+{
+    for (size_t i = 0; i < N_CAMERAS; i++) {
+        if (_al_cameras[i] != NULL) {
+            al_camera_stop(_al_cameras[i]);
+        }
+    }
 }

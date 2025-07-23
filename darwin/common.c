@@ -36,6 +36,7 @@ void
 fatal_signal_handler(int signum)
 {
     // clean up
+    al_camera_cleanup();
 
     signal(signum, SIG_DFL);
     raise(signum);

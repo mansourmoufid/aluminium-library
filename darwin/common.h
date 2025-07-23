@@ -359,3 +359,5 @@ _vt_status_string(const OSStatus status)
         (int) status, \
         _vt_status_string(status) \
     )
+
+void al_camera_cleanup(void);

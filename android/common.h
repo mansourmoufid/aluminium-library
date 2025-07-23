@@ -160,3 +160,5 @@ amedia_status_string(media_status_t status)
         function, \
         amedia_status_string(status) \
     )
+
+void al_camera_cleanup(void);

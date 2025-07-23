@@ -67,6 +67,7 @@ typedef const struct opaqueCMSampleBuffer *ConstCMSampleBufferRef;
 #include "yuv.h"
 
 struct al_camera {
+    size_t index;
     AlCameraController *controller;
     AVCaptureDevice *device;
     AVCaptureSession *session;
@@ -86,6 +87,9 @@ struct al_camera {
     volatile bool read;
     volatile bool stop;
 };
+
+#define N_CAMERAS 64
+static struct al_camera *_al_cameras[N_CAMERAS] = {0};
 
 @interface AlCameraController : NSObject
 @property(atomic) struct al_camera *camera;
@@ -720,6 +724,10 @@ al_camera_new(
         goto error0;
     }
 
+    (*cam)->index = index;
+    if (index < N_CAMERAS)
+        _al_cameras[index] = *cam;
+
     (*cam)->controller = [[AlCameraController alloc] initWithCamera:(*cam)];
     if ((*cam)->controller == nil)
         goto error1;
@@ -888,6 +896,8 @@ al_camera_free(struct al_camera *cam)
     if (cam->controller != nil)
         [cam->controller release];
     cam->controller = nil;
+    if (cam->index < N_CAMERAS)
+        _al_cameras[cam->index] = NULL;
     free(cam);
 }
 
@@ -995,4 +1005,14 @@ al_camera_set_stride(struct al_camera *cam, size_t stride)
     assert(cam != NULL);
     (void) stride;
     return AL_NOTIMPLEMENTED;
+}
+
+void
+al_camera_cleanup(void)
+{
+    for (size_t i = 0; i < N_CAMERAS; i++) {
+        if (_al_cameras[i] != NULL) {
+            al_camera_stop(_al_cameras[i]);
+        }
+    }
 }
