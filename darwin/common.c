@@ -18,6 +18,8 @@
  */
 
 #include <assert.h>
+#include <signal.h>
+#include <string.h> // strsignal
 
 #include <CoreFoundation/CFString.h>
 
@@ -29,6 +31,41 @@ const char *const platform = "darwin";
 
 CFStringEncoding _al_encoding = kCFStringEncodingUTF8;
 
+static
+void
+fatal_signal_handler(int signum)
+{
+    // clean up
+
+    signal(signum, SIG_DFL);
+    raise(signum);
+}
+
+static
+void
+catch_fatal_signals(void)
+{
+    const int signals[] = {
+        SIGTERM,
+        SIGINT,
+        SIGQUIT,
+        SIGABRT,
+        SIGSEGV,
+        SIGFPE,
+        SIGILL,
+        SIGBUS,
+    };
+    for (size_t i = 0; i < sizeof signals / sizeof (signals[0]); i++) {
+        if (signal(signals[i], &fatal_signal_handler) == SIG_ERR) {
+            DEBUG(
+                "signal(%s, %p) = SIG_ERR",
+                strsignal(signals[i]),
+                &fatal_signal_handler
+            );
+        }
+    }
+}
+
 __attribute__((constructor))
 void
 init(void)
@@ -36,4 +73,5 @@ init(void)
     _al_encoding = CFStringGetSystemEncoding();
     DEBUG("_al_encoding = %s", _cfstringencoding_string(_al_encoding));
     assert(CFStringIsEncodingAvailable(_al_encoding));
+    catch_fatal_signals();
 }

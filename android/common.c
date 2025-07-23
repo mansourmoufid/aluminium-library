@@ -18,8 +18,10 @@
  */
 
 #include <assert.h>
+#include <signal.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include <string.h> // strsignal
 
 #include <android/log.h>
 
@@ -147,8 +149,44 @@ _getconfig(JNIEnv *env, jobject context)
     return (*env)->CallObjectMethod(env, res, get_configuration);
 }
 
+static
+void
+fatal_signal_handler(int signum)
+{
+    // clean up
+
+    signal(signum, SIG_DFL);
+    raise(signum);
+}
+
+static
+void
+catch_fatal_signals(void)
+{
+    const int signals[] = {
+        SIGTERM,
+        SIGINT,
+        SIGQUIT,
+        SIGABRT,
+        SIGSEGV,
+        SIGFPE,
+        SIGILL,
+        SIGBUS,
+    };
+    for (size_t i = 0; i < sizeof signals / sizeof (signals[0]); i++) {
+        if (signal(signals[i], &fatal_signal_handler) == SIG_ERR) {
+            DEBUG(
+                "signal(%s, %p) = SIG_ERR",
+                strsignal(signals[i]),
+                &fatal_signal_handler
+            );
+        }
+    }
+}
+
 __attribute__((constructor))
 void
 init(void)
 {
+    catch_fatal_signals();
 }
