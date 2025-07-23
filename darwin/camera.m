@@ -345,9 +345,16 @@ new_output(struct al_camera *cam)
         DEBUG("    %s", _cv_pixel_format_string([fmt unsignedIntValue]));
     }
     [available release];
+#if defined(TARGET_OS_IOS) && TARGET_OS_IOS
+    // iOS expects a single format here
+    [output setVideoSettings:@{
+        (__bridge NSString *) kCVPixelBufferPixelFormatTypeKey: [preferred firstObject]
+    }];
+#else
     [output setVideoSettings:@{
         (__bridge NSString *) kCVPixelBufferPixelFormatTypeKey: preferred
     }];
+#endif
     [preferred release];
     return output;
 }
