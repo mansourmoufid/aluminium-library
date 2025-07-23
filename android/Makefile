@@ -15,7 +15,8 @@ ifeq ("$(ABI)","arm64-v8a")
 TARGET:=	aarch64-linux-android
 endif
 
-LDFLAGS:=	-landroid -llog -lcamera2ndk -lm -lmediandk
+LDFLAGS:=
+# LDFLAGS:=	-landroid -llog -lcamera2ndk -lm -lmediandk
 
 ENV:=	\
 	API="$(API)" \

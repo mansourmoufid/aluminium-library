@@ -109,3 +109,26 @@ SOEXT:=         .dylib
 endif
 
 SOEXT?=         .so
+
+ifeq ("$(VEND)","apple")
+LDFLAGS+=       -framework Accelerate
+LDFLAGS+=       -framework AVFoundation
+LDFLAGS+=       -framework CoreFoundation
+LDFLAGS+=       -framework CoreMedia
+LDFLAGS+=       -framework CoreVideo
+LDFLAGS+=       -framework Foundation
+LDFLAGS+=       -framework IOSurface
+LDFLAGS+=       -framework VideoToolbox
+LDFLAGS+=       -lobjc
+LDFLAGS+=       -Wl,-install_name,libal.dylib
+endif
+
+ifeq ("$(SYS)","android")
+ANDROID:=       true
+endif
+ifeq ("$(SYS)","androideabi")
+ANDROID:=       true
+endif
+ifeq ("$(ANDROID)","true")
+LDFLAGS+=       -landroid -llog -lcamera2ndk -lm -lmediandk
+endif

@@ -13,16 +13,16 @@ TARGETS:= \
 
 CPPFLAGS:=	-D_DARWIN_C_SOURCE=1
 LDFLAGS:=
-LDFLAGS+=	-framework Accelerate
-LDFLAGS+=	-framework AVFoundation
-LDFLAGS+=	-framework CoreFoundation
-LDFLAGS+=	-framework CoreMedia
-LDFLAGS+=	-framework CoreVideo
-LDFLAGS+=	-framework Foundation
-LDFLAGS+=	-framework IOSurface
-LDFLAGS+=	-framework VideoToolbox
-LDFLAGS+=	-lobjc
-LDFLAGS+=	-Wl,-install_name,libal.dylib
+# LDFLAGS+=	-framework Accelerate
+# LDFLAGS+=	-framework AVFoundation
+# LDFLAGS+=	-framework CoreFoundation
+# LDFLAGS+=	-framework CoreMedia
+# LDFLAGS+=	-framework CoreVideo
+# LDFLAGS+=	-framework Foundation
+# LDFLAGS+=	-framework IOSurface
+# LDFLAGS+=	-framework VideoToolbox
+# LDFLAGS+=	-lobjc
+# LDFLAGS+=	-Wl,-install_name,libal.dylib
 
 SOEXT:=		.dylib
 
