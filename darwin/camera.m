@@ -26,6 +26,7 @@
 #include <stdint.h>
 #include <stdlib.h> // calloc, free
 #include <string.h> // strerror
+#include <unistd.h> // usleep
 
 #include <dispatch/dispatch.h> // dispatch_queue_t
 #include <objc/objc.h> // BOOL, YES, NO
@@ -900,6 +901,7 @@ al_camera_stop(struct al_camera *cam)
     if (cam->session != nil) {
         if ([cam->session isRunning])
             [cam->session stopRunning];
+            usleep(200e3);
     }
 }
 
