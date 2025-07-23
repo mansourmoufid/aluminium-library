@@ -122,6 +122,9 @@ LDFLAGS+=       -framework VideoToolbox
 LDFLAGS+=       -lobjc
 LDFLAGS+=       -Wl,-install_name,libal.dylib
 endif
+ifeq ("$(SYS)","ios")
+LDFLAGS+=       -framework UIKit
+endif
 
 ifeq ("$(SYS)","android")
 ANDROID:=       true

@@ -19,10 +19,33 @@
 
 #include <stddef.h>
 
+#include <TargetConditionals.h> // TARGET_OS_IOS, TARGET_OS_OSX
+
+#if defined(TARGET_OS_IOS) && TARGET_OS_IOS
+#import <UIKit/UIKit.h>
+#endif
+
 #include "al.h"
 
 int
 al_display_orientation(void)
 {
+#if defined(TARGET_OS_IOS) && TARGET_OS_IOS
+    UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+    switch (orientation) {
+        case UIDeviceOrientationPortrait:
+            return 0;
+        case UIDeviceOrientationLandscapeRight:
+            return 90;
+        case UIDeviceOrientationPortraitUpsideDown:
+            return 180;
+        case UIDeviceOrientationLandscapeLeft:
+            return 270;
+        case UIDeviceOrientationFaceUp:
+        case UIDeviceOrientationFaceDown:
+        case UIDeviceOrientationUnknown:
+            return 0;
+    }
+#endif
     return 0;
 }
