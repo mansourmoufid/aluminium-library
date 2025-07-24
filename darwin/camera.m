@@ -907,7 +907,16 @@ al_camera_start(struct al_camera *cam)
 {
     assert(cam != NULL);
     assert(cam->session != nil);
-    [cam->session startRunning];
+
+    // [cam->session startRunning];
+    dispatch_async(
+        dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0),
+        ^{
+            if (cam->session != nil && !cam->stop)
+                 [cam->session startRunning];
+        }
+    );
+
     cam->stop = false;
 }
 
