@@ -43,6 +43,7 @@ LDFLAGS+=       -g
 endif
 
 CFLAGS+=        -Wall
+CFLAGS+=        -Wno-atomic-implicit-seq-cst
 CFLAGS+=        -Wno-declaration-after-statement
 CFLAGS+=        -Wno-padded
 CFLAGS+=        -Wno-unused-command-line-argument
