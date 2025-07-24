@@ -21,6 +21,7 @@
 #include <errno.h>
 #include <float.h> // FLT_MAX
 #include <math.h> // sqrtf
+#include <stdatomic.h> // atomic_bool
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -84,8 +85,8 @@ struct al_camera {
     vImage_Buffer image_buffers[4];
     struct al_image image;
     struct al_image rgba;
-    volatile bool read;
-    volatile bool stop;
+    atomic_bool read;
+    atomic_bool stop;
 };
 
 #define N_CAMERAS 64

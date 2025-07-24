@@ -23,6 +23,7 @@
 #include <inttypes.h> // PRIi64
 #include <limits.h> // INT32_MAX
 #include <math.h> // sqrtf
+#include <stdatomic.h> // atomic_bool
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h> // int32_t, int64_t
@@ -83,8 +84,8 @@ struct al_camera {
     uint8_t *yuv420sp; // I420
     uint32_t *rgba;
     struct al_image image;
-    volatile bool read;
-    volatile bool stop;
+    atomic_bool read;
+    atomic_bool stop;
 };
 
 #define N_CAMERAS 64
