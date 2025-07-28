@@ -35,7 +35,7 @@ ENV:= \
 .PHONY: so
 so:
 	for target in $(TARGETS); do \
-		env $(ENV) TARGET="$$target" $(MAKE) so || exit 1; \
+		env $(ENV) TARGET="$$target" "$(MAKE)" so || exit 1; \
 	done
 
 .PHONY: install-so

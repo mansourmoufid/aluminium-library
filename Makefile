@@ -96,13 +96,13 @@ test: al.py
 
 .PHONY: cleanup
 cleanup:
-	$(MAKE) -f android/Makefile cleanup
-	$(MAKE) -f darwin/Makefile cleanup
+	"$(MAKE)" -f android/Makefile cleanup
+	"$(MAKE)" -f darwin/Makefile cleanup
 
 .PHONY: clean
 clean: cleanup
-	$(MAKE) -f android/Makefile clean
-	$(MAKE) -f darwin/Makefile clean
+	"$(MAKE)" -f android/Makefile clean
+	"$(MAKE)" -f darwin/Makefile clean
 	rm -rf .mypy_cache
 	dot_clean .
 	find . -name .DS_Store | xargs rm -f

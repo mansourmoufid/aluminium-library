@@ -27,7 +27,7 @@ ENV:=	\
 .PHONY: so
 so:
 	for abi in $(ABIS); do \
-		env $(ENV) ABI="$$abi" python -m androidenv $(MAKE) so || exit 1; \
+		env $(ENV) ABI="$$abi" python -m androidenv "$(MAKE)" so || exit 1; \
 	done
 
 .PHONY: install-so
@@ -38,7 +38,7 @@ install-so: so
 .PHONY: install
 install:
 	for abi in $(ABIS); do \
-		ABI=$$abi $(MAKE) -f $(MAKEFILE) install-so; \
+		ABI=$$abi "$(MAKE)" -f $(MAKEFILE) install-so; \
 	done
 	for abi in $(ABIS); do \
 		ABI=$$abi API=$(API) python -m androidenv --find-library $(LIBS) \

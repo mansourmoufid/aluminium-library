@@ -77,10 +77,10 @@ LDFLAGS+=       -Wl,-no_implicit_dylibs
 endif
 
 ifeq ("$(SYS)","darwin")
-SDKROOT:=       $(shell xcrun --sdk macosx --show-sdk-path)
-AR:=            $(shell xcrun --sdk macosx --find $(AR))
-CC:=            $(shell xcrun --sdk macosx --find $(CC))
-LD:=            $(shell xcrun --sdk macosx --find $(CC))
+SDKROOT:=       "$(shell xcrun --sdk macosx --show-sdk-path)"
+AR:=            "$(shell xcrun --sdk macosx --find $(AR))"
+CC:=            "$(shell xcrun --sdk macosx --find $(CC))"
+LD:=            "$(shell xcrun --sdk macosx --find $(CC))"
 CPPFLAGS+=      -isysroot $(SDKROOT)
 CFLAGS+=        --sysroot=$(SDKROOT)
 LDFLAGS+=       --sysroot=$(SDKROOT)
@@ -96,10 +96,10 @@ SOEXT:=         .dylib
 endif
 
 ifeq ("$(SYS)","ios")
-SDKROOT:=       $(shell xcrun --sdk iphoneos --show-sdk-path)
-AR:=            $(shell xcrun --sdk iphoneos --find $(AR))
-CC:=            $(shell xcrun --sdk iphoneos --find $(CC))
-LD:=            $(shell xcrun --sdk iphoneos --find $(CC))
+SDKROOT:=       "$(shell xcrun --sdk iphoneos --show-sdk-path)"
+AR:=            "$(shell xcrun --sdk iphoneos --find $(AR))"
+CC:=            "$(shell xcrun --sdk iphoneos --find $(CC))"
+LD:=            "$(shell xcrun --sdk iphoneos --find $(CC))"
 CPPFLAGS+=      -isysroot $(SDKROOT)
 CFLAGS+=        --sysroot=$(SDKROOT)
 LDFLAGS+=       --sysroot=$(SDKROOT)
