@@ -21,5 +21,10 @@
 
 #include "common.h" // DEBUG
 
+#if defined(__OBJC__)
 @class AlCameraController; 
 @class AlOutputDelegate;
+#endif
+
+bool _al_camera_have_authorization(void);
+void _al_camera_request_authorization(void);

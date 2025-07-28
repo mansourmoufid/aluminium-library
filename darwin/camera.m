@@ -186,9 +186,8 @@ get_device(struct al_camera *cam, NSUInteger index)
     return nil;
 }
 
-static inline
 bool
-_have_authorization(void)
+_al_camera_have_authorization(void)
 {
     if (@available(iOS 7.0, macOS 10.14, *)) {
         AVAuthorizationStatus status = [
@@ -215,9 +214,8 @@ _have_authorization(void)
     return false;
 }
 
-static inline
 void
-_request_authorization(void)
+_al_camera_request_authorization(void)
 {
     if (@available(iOS 7.0, macOS 10.14, *)) {
         [AVCaptureDevice
@@ -737,8 +735,8 @@ al_camera_new(
     if ((*cam)->device == nil)
         goto error2;
 
-    if (!_have_authorization()) {
-        _request_authorization();
+    if (!_al_camera_have_authorization()) {
+        _al_camera_request_authorization();
         goto error3;
     }
 

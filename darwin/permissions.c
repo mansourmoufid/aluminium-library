@@ -20,16 +20,23 @@
 #include <stdbool.h>
 
 #include "al.h"
+#include "camera.h"
 
 bool
 al_permissions_have(const char *permission)
 {
-    (void) permission;
-    return AL_ERROR;
+    if (permission == NULL)
+        return false;
+    if (strcmp(permission, "com.apple.security.device.camera") == 0)
+        return _al_camera_have_authorization();
+    return false;
 }
 
 void
 al_permissions_request(const char *permission)
 {
-    (void) permission;
+    if (permission == NULL)
+        return;
+    if (strcmp(permission, "com.apple.security.device.camera") == 0)
+        _al_camera_request_authorization();
 }
