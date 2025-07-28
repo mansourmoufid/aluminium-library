@@ -22,7 +22,6 @@
 #include <float.h> // FLT_MAX
 #include <inttypes.h> // PRIi64
 #include <limits.h> // INT32_MAX
-#include <math.h> // sqrtf
 #include <stdatomic.h> // atomic_bool
 #include <stdbool.h>
 #include <stddef.h>
@@ -47,7 +46,7 @@
 
 #include "al.h"
 
-#include "arithmetic.h" // _al_calc_next_multiple
+#include "arithmetic.h" // _al_calc_next_multiple, _al_l2norm
 #include "camera.h" // DEBUG_ACAMERA
 #include "common.h" // DEBUG, DEBUG_AMEDIA, COLOR_Format*
 #include "mediacodec.h"
@@ -689,13 +688,6 @@ error0:
 }
 
 static inline
-float
-l2norm(float x, float y, float a, float b)
-{
-    return sqrtf((x - a) * (x - a) + (y - b) * (y - b));
-}
-
-static inline
 struct metadata
 get_camera_metadata(struct al_camera *cam)
 {
@@ -760,7 +752,7 @@ get_camera_metadata(struct al_camera *cam)
                 continue;
             if (format != cam->image_format)
                 continue;
-            float norm = l2norm(
+            float norm = _al_l2norm(
                 (float) cam->width,
                 (float) cam->height,
                 (float) width,

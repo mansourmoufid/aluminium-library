@@ -20,6 +20,7 @@
 #pragma once
 
 #include <float.h> // FLT_MANT_DIG
+#include <math.h> // sqrtf
 #include <stddef.h>
 
 #define FLT_MAX_ZERO_EXP (((uint32_t) 1 << FLT_MANT_DIG) - 1)
@@ -32,4 +33,12 @@ size_t
 _al_calc_next_multiple(size_t x, size_t n)
 {
     return (x / n + 1) * n;
+}
+
+static inline
+__attribute__((const))
+float
+_al_l2norm(float x, float y, float a, float b)
+{
+    return sqrtf((x - a) * (x - a) + (y - b) * (y - b));
 }

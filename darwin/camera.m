@@ -20,7 +20,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <float.h> // FLT_MAX
-#include <math.h> // sqrtf
 #include <stdatomic.h> // atomic_bool
 #include <stdbool.h>
 #include <stddef.h>
@@ -62,7 +61,7 @@ typedef const struct opaqueCMSampleBuffer *ConstCMSampleBufferRef;
 
 #include "al.h"
 
-#include "arithmetic.h"
+#include "arithmetic.h" // _al_l2norm
 #include "camera.h"
 #include "common.h"
 #include "yuv.h"
@@ -252,14 +251,6 @@ get_session(struct al_camera *cam)
 }
 
 static inline
-__attribute__((const))
-float
-l2norm(float x, float y, float a, float b)
-{
-    return sqrtf((x - a) * (x - a) + (y - b) * (y - b));
-}
-
-static inline
 AVCaptureSessionPreset
 nearest_preset(size_t width, size_t height)
 {
@@ -297,7 +288,7 @@ nearest_preset(size_t width, size_t height)
         NSDictionary *preset = [presets objectAtIndex:i];
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wobjc-messaging-id"
-        float norm = l2norm(
+        float norm = _al_l2norm(
             (float) width,
             (float) height,
             [preset[@"width"] floatValue],
