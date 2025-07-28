@@ -30,6 +30,7 @@ limitations under the License. */
 #include "yuv.h"
 
 static inline
+__attribute__((const))
 int32_t
 min(int32_t a, int32_t b)
 {
@@ -40,6 +41,7 @@ min(int32_t a, int32_t b)
 }
 
 static inline
+__attribute__((const))
 int32_t
 max(int32_t a, int32_t b)
 {
@@ -50,6 +52,7 @@ max(int32_t a, int32_t b)
 }
 
 static inline
+__attribute__((const))
 uint32_t
 yuv_to_rgb(int32_t y, int32_t u, int32_t v)
 {

@@ -252,6 +252,7 @@ get_session(struct al_camera *cam)
 }
 
 static inline
+__attribute__((const))
 float
 l2norm(float x, float y, float a, float b)
 {
@@ -363,6 +364,7 @@ new_output(struct al_camera *cam)
 }
 
 static inline
+__attribute__((const))
 uint32_t
 argb_to_rgba(uint32_t x)
 {
@@ -374,6 +376,7 @@ argb_to_rgba(uint32_t x)
 }
 
 static inline
+__attribute__((const))
 uint32_t
 bgra_to_rgba(uint32_t x)
 {

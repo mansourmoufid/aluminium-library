@@ -27,6 +27,7 @@
 #define SIZE_MAX_SQRT (((size_t) 1) << (8 * sizeof (size_t) / 2))
 
 static inline
+__attribute__((const))
 size_t
 _al_calc_next_multiple(size_t x, size_t n)
 {
