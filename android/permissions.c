@@ -141,7 +141,7 @@ request_permission(JNIEnv *env, const char *permission)
     }
 }
 
-int
+bool
 al_permissions_have(const char *permission)
 {
     JNIEnv *env = _jnienv();

@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <stdbool.h>
 #include <stddef.h>
 
 enum al_status {
@@ -47,7 +48,7 @@ const char *al_locale(void);
 const char *al_datadir(void);
 const char *al_libdir(void);
 
-int al_permissions_have(const char *);
+bool al_permissions_have(const char *);
 void al_permissions_request(const char *);
 
 int al_display_orientation(void);

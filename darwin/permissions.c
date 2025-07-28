@@ -17,9 +17,11 @@
  * with Aluminium Library. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <stdbool.h>
+
 #include "al.h"
 
-int
+bool
 al_permissions_have(const char *permission)
 {
     (void) permission;
