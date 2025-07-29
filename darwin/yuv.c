@@ -39,7 +39,7 @@
 
 enum al_status
 _al_darwin_yuv_to_rgba(
-    CVImageBufferRef image_buffer,
+    const CVImageBufferRef image_buffer,
     vImage_Buffer image_buffers[NUM_IMAGE_BUFFERS]
 ) {
     assert(image_buffer != NULL);

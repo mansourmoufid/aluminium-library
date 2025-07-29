@@ -221,7 +221,7 @@ al_image_rotate(struct al_image *src, struct al_image *dst, int degrees)
 
 static inline
 enum al_status
-_copy_yuv420sp(struct al_image *src, struct al_image *dst)
+_copy_yuv420sp(const struct al_image *src, struct al_image *dst)
 {
     assert(src != NULL);
     assert(dst != NULL);
@@ -244,7 +244,7 @@ _copy_yuv420sp(struct al_image *src, struct al_image *dst)
 
 static inline
 enum al_status
-_copy_rgba(struct al_image *src, struct al_image *dst)
+_copy_rgba(const struct al_image *src, struct al_image *dst)
 {
     assert(src != NULL);
     assert(dst != NULL);
@@ -263,7 +263,7 @@ _copy_rgba(struct al_image *src, struct al_image *dst)
 }
 
 enum al_status
-al_image_copy(struct al_image *src, struct al_image *dst)
+al_image_copy(const struct al_image *src, struct al_image *dst)
 {
     assert(src != NULL);
     assert(dst != NULL);

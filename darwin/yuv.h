@@ -43,6 +43,6 @@ enum image_buffer_index {
 
 enum al_status
 _al_darwin_yuv_to_rgba(
-    CVImageBufferRef,
+    const CVImageBufferRef,
     vImage_Buffer [NUM_IMAGE_BUFFERS]
 );

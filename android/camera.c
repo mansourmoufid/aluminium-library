@@ -79,9 +79,9 @@ struct al_camera {
     size_t stride;
     int32_t image_format;
     int color_format;
-    uint8_t *yuv420p; // NV12
-    uint8_t *yuv420sp; // I420
-    uint32_t *rgba;
+    uint8_t *restrict yuv420p; // NV12
+    uint8_t *restrict yuv420sp; // I420
+    uint32_t *restrict rgba;
     struct al_image image;
     atomic_bool read;
     atomic_bool stop;
@@ -291,7 +291,7 @@ process_image(struct al_camera *cam, AImage *image)
     switch (cam->color_format) {
         case COLOR_FormatYUV420Planar:
             status2 = al_image_copy(
-                &((struct al_image) {
+                &((const struct al_image) {
                     .width = cam->width,
                     .height = cam->height,
                     .stride = cam->width,
@@ -304,7 +304,7 @@ process_image(struct al_camera *cam, AImage *image)
             break;
         case COLOR_FormatYUV420SemiPlanar:
             status2 = al_image_copy(
-                &((struct al_image) {
+                &((const struct al_image) {
                     .width = cam->width,
                     .height = cam->height,
                     .stride = cam->width,

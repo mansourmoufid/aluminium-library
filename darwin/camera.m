@@ -494,7 +494,7 @@ process_image(struct al_camera *cam, CVImageBufferRef image)
         case kCVPixelFormatType_420YpCbCr8Planar:
         case kCVPixelFormatType_420YpCbCr8PlanarFullRange:
             status = al_image_copy(
-                &((struct al_image) {
+                &((const struct al_image) {
                     .width = width,
                     .height = height,
                     .stride = y_stride,
@@ -512,7 +512,7 @@ process_image(struct al_camera *cam, CVImageBufferRef image)
         case kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange:
         case kCVPixelFormatType_420YpCbCr8BiPlanarFullRange:
             status = al_image_copy(
-                &((struct al_image) {
+                &((const struct al_image) {
                     .width = width,
                     .height = height,
                     .stride = y_stride,
@@ -531,7 +531,7 @@ process_image(struct al_camera *cam, CVImageBufferRef image)
         case kCVPixelFormatType_32ARGB:
         case kCVPixelFormatType_32BGRA:
             status = al_image_copy(
-                &((struct al_image) {
+                &((const struct al_image) {
                     .width = width,
                     .height = height,
                     .stride = y_stride,
@@ -600,7 +600,7 @@ process_image(struct al_camera *cam, CVImageBufferRef image)
         if (status != AL_OK)
             goto error4;
         status = al_image_copy(
-            &((struct al_image) {
+            &((const struct al_image) {
                 .width = cam->image_buffers[RGBA].width,
                 .height = cam->image_buffers[RGBA].height,
                 .stride = cam->image_buffers[RGBA].rowBytes,

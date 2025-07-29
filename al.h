@@ -81,4 +81,4 @@ enum al_status al_image_alloc(struct al_image *);
 void al_image_free(struct al_image *);
 enum al_status al_image_convert(struct al_image *, struct al_image *);
 enum al_status al_image_rotate(struct al_image *, struct al_image *, int);
-enum al_status al_image_copy(struct al_image *, struct al_image *);
+enum al_status al_image_copy(const struct al_image *, struct al_image *);

@@ -112,7 +112,7 @@ al_yuv_to_rgba(
 #else
 static inline
 void
-_al_debug_buffer(uint8_t *buffer, size_t size)
+_al_debug_buffer(const uint8_t *buffer, size_t size)
 {
     for (size_t i = 0; i < size; i++) {
         printf("%02u ", buffer[i]);
