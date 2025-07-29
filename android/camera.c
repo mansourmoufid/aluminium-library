@@ -262,7 +262,7 @@ process_image(struct al_camera *cam, AImage *image)
                 memcpy(&(y[i * width]), &(y_pixel[i * y_stride]), width);
             }
             uint8_t *uv = cam->yuv420sp + height * width;
-            assert(u_pixel = v_pixel + 1);
+            assert(u_pixel == v_pixel + 1);
             for (size_t i = 0; i < height / 2; i++) {
                 for (size_t j = 0; j < width / 2; j++) {
                     uv[i * width + j * 2 + 0] = u_pixel[i * uv_stride + j * 2];
