@@ -22,12 +22,17 @@
 #include <string.h> // strsignal
 
 #include <CoreFoundation/CFString.h>
+#include <TargetConditionals.h> // TARGET_OS_IOS
 
 #include "al.h"
 #include "common.h"
 
 const char *const copyright = "Copyright 2023-2025, Mansour Moufid <mansourmoufid@gmail.com>";
+#if defined(TARGET_OS_IOS) && TARGET_OS_IOS
+const char *const platform = "ios";
+#else
 const char *const platform = "darwin";
+#endif
 
 CFStringEncoding _al_encoding = kCFStringEncodingUTF8;
 
