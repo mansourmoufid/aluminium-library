@@ -35,11 +35,11 @@ al_display_orientation(void)
     switch (orientation) {
         case UIDeviceOrientationPortrait:
             return 0;
-        case UIDeviceOrientationLandscapeRight:
+        case UIDeviceOrientationLandscapeLeft:
             return 90;
         case UIDeviceOrientationPortraitUpsideDown:
             return 180;
-        case UIDeviceOrientationLandscapeLeft:
+        case UIDeviceOrientationLandscapeRight:
             return 270;
         case UIDeviceOrientationFaceUp:
         case UIDeviceOrientationFaceDown:
