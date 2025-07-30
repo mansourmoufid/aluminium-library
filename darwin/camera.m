@@ -990,6 +990,18 @@ al_camera_get_facing(struct al_camera *cam, enum al_camera_facing *facing)
 {
     assert(cam != NULL);
     assert(facing != NULL);
+    if (cam->device == nil)
+        return AL_ERROR;
+    AVCaptureDevicePosition position = [cam->device position];
+    switch (position) {
+        case AVCaptureDevicePositionFront:
+            *facing = AL_CAMERA_FACING_FRONT;
+            return AL_OK;
+        case AVCaptureDevicePositionBack:
+        case AVCaptureDevicePositionUnspecified:
+            *facing = AL_CAMERA_FACING_BACK;
+            return AL_OK;
+    }
     return AL_NOTIMPLEMENTED;
 }
 
@@ -998,7 +1010,43 @@ al_camera_get_orientation(struct al_camera *cam, int *orientation)
 {
     assert(cam != NULL);
     assert(orientation != NULL);
+#if defined(TARGET_OS_IOS) && TARGET_OS_IOS
+    *orientation = 90;
+#endif
+    *orientation = 0;
+    return AL_OK;
+    /*
+    if (cam->output == nil)
+        return AL_ERROR;
+    AVCaptureConnection *connection = [
+        cam->output connectionWithMediaType:AVMediaTypeVideo
+    ];
+    if (connection == nil)
+        return AL_ERROR;
+    if (@available(iOS 17.0, macOS 14.0, *)) {
+        CGFloat x = [connection videoRotationAngle];
+        *orientation = (int) x;
+        return AL_OK;
+    } else {
+        AVCaptureVideoOrientation x = [connection videoOrientation];
+        switch (x) {
+            case AVCaptureVideoOrientationPortrait:
+                *orientation = 90;
+                break;
+            case AVCaptureVideoOrientationPortraitUpsideDown:
+                *orientation = 270;
+                break;
+            case AVCaptureVideoOrientationLandscapeRight:
+                *orientation = 180;
+                break;
+            case AVCaptureVideoOrientationLandscapeLeft:
+                *orientation = 0;
+                break;
+        }
+        return AL_OK;
+    }
     return AL_NOTIMPLEMENTED;
+    */
 }
 
 enum al_status
