@@ -64,7 +64,7 @@ CFLAGS+=        -mfpmath=sse
 CFLAGS+=        -msse4.2
 endif
 
-ifeq ("$(ARCH)","arm64")
+ifeq ("$(ARCH)","armv7")
 CFLAGS+=        -mfpu=neon
 endif
 
