@@ -2,7 +2,7 @@ Aluminium Library is a cross-platform computer vision library.
 
 # Building
 
-## macOS
+## iOS / macOS
 
     DEBUG=1 make -f darwin/Makefile so
 
