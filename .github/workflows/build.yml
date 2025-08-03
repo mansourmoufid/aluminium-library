@@ -1,0 +1,52 @@
+name: Build
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build on macOS
+      if: matrix.os == 'macos-latest'
+      run: |
+        sw_vers
+        xcodebuild -version
+        xcode-select -p
+        xcodebuild -showsdks
+        xcrun simctl list devices available
+        clang --version
+        DEBUG=1 make -f darwin/Makefile so
+    - name: Setup Java
+      if: matrix.os == 'ubuntu-latest'
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - name: Setup Android SDK
+      if: matrix.os == 'ubuntu-latest'
+      uses: android-actions/setup-android@v3
+    - name: Set up Python
+      if: matrix.os == 'ubuntu-latest'
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    - name: Install Python dependencies
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        pip install git+https://github.com/mansourmoufid/python-androidenv.git
+    - name: Build on Linux
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        java -version
+        echo "ANDROID_HOME: $ANDROID_HOME"
+        echo "ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
+        sdkmanager --version
+        python --version
+        pip list
+        DEBUG=1 make -f android/Makefile so
