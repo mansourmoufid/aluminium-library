@@ -79,9 +79,9 @@ struct al_camera {
     size_t stride;
     int32_t image_format;
     int color_format;
-    uint8_t *restrict yuv420p; // NV12
-    uint8_t *restrict yuv420sp; // I420
-    uint32_t *restrict rgba;
+    struct al_image yuv420p; // NV12
+    struct al_image yuv420sp; // I420
+    struct al_image rgba;
     struct al_image image;
     atomic_bool read;
     atomic_bool stop;
@@ -123,6 +123,7 @@ process_image(struct al_camera *cam, AImage *image)
     int32_t y_pixel_stride = 0;
     int32_t uv_pixel_stride = 0;
     media_status_t status;
+    enum al_status status2;
 
     int32_t w = 0;
     int32_t h = 0;
@@ -196,29 +197,35 @@ process_image(struct al_camera *cam, AImage *image)
             goto error;
     }
 
-    if (cam->yuv420sp == NULL) {
-        size_t size = width * height * 3 / 2;
-        cam->yuv420sp = calloc(size, sizeof (uint8_t));
-        if (cam->yuv420sp == NULL) {
-            DEBUG("calloc: errno=%i [%s]", errno, strerror(errno));
-            goto error;
-        }
+    if (cam->yuv420sp.width < width || cam->yuv420sp.height < height)
+        al_image_free(&cam->yuv420sp);
+    if (cam->yuv420sp.data == NULL) {
+        cam->yuv420sp.width = width;
+        cam->yuv420sp.height = height;
+        cam->yuv420sp.stride = width;
+        cam->yuv420sp.format = AL_COLOR_FORMAT_YUV420SP;
+        status2 = al_image_alloc(&cam->yuv420sp);
+        assert(status2 == AL_OK);
     }
-    if (cam->yuv420p == NULL) {
-        size_t size = width * height * 3 / 2;
-        cam->yuv420p = calloc(size, sizeof (uint8_t));
-        if (cam->yuv420p == NULL) {
-            DEBUG("calloc: errno=%i [%s]", errno, strerror(errno));
-            goto error;
-        }
+    if (cam->yuv420p.width < width || cam->yuv420p.height < height)
+        al_image_free(&cam->yuv420p);
+    if (cam->yuv420p.data == NULL) {
+        cam->yuv420p.width = width;
+        cam->yuv420p.height = height;
+        cam->yuv420p.stride = width;
+        cam->yuv420p.format = AL_COLOR_FORMAT_YUV420P;
+        status2 = al_image_alloc(&cam->yuv420p);
+        assert(status2 == AL_OK);
     }
-    if (cam->rgba == NULL) {
-        size_t size = width * cam->height;
-        cam->rgba = calloc(size, sizeof (uint32_t));
-        if (cam->rgba == NULL) {
-            DEBUG("calloc: errno=%i [%s]", errno, strerror(errno));
-            goto error;
-        }
+    if (cam->rgba.width < width || cam->rgba.height < height)
+        al_image_free(&cam->rgba);
+    if (cam->rgba.data == NULL) {
+        cam->rgba.width = width;
+        cam->rgba.height = height;
+        cam->rgba.stride = width;
+        cam->rgba.format = AL_COLOR_FORMAT_RGBA;
+        status2 = al_image_alloc(&cam->rgba);
+        assert(status2 == AL_OK);
     }
 
     switch (format) {
@@ -242,11 +249,11 @@ process_image(struct al_camera *cam, AImage *image)
         case COLOR_FormatYUV420Planar:
             // YV12 to I420
             {
-            uint8_t *const y = cam->yuv420p;
+            uint8_t *const y = cam->yuv420p.data;
             for (size_t i = 0; i < height; i++) {
                 memcpy(&(y[i * width]), &(y_pixel[i * y_stride]), width);
             }
-            uint8_t *const u = cam->yuv420p + height * width;
+            uint8_t *const u = (uint8_t *) cam->yuv420p.data + height * width;
             uint8_t *const v = u + (height / 2) * (width / 2);
             for (size_t i = 0; i < height / 2; i++) {
                 memcpy(&(u[i * width / 2]), &(u_pixel[i * uv_stride]), width / 2);
@@ -258,10 +265,10 @@ process_image(struct al_camera *cam, AImage *image)
             // NV21 to NV12
             {
             for (size_t i = 0; i < height; i++) {
-                uint8_t *y = cam->yuv420sp;
+                uint8_t *y = cam->yuv420sp.data;
                 memcpy(&(y[i * width]), &(y_pixel[i * y_stride]), width);
             }
-            uint8_t *uv = cam->yuv420sp + height * width;
+            uint8_t *uv = (uint8_t *) cam->yuv420sp.data + height * width;
             assert(u_pixel == v_pixel + 1);
             for (size_t i = 0; i < height / 2; i++) {
                 for (size_t j = 0; j < width / 2; j++) {
@@ -286,8 +293,13 @@ process_image(struct al_camera *cam, AImage *image)
             break;
     }
 
-    enum al_status status2 = al_image_alloc(&cam->image);
-    assert(status2 == AL_OK);
+    if (cam->image.width < width || cam->image.height < height)
+        al_image_free(&cam->image);
+    if (cam->image.data == NULL) {
+        status2 = al_image_alloc(&cam->image);
+        assert(status2 == AL_OK);
+    }
+
     switch (cam->color_format) {
         case COLOR_FormatYUV420Planar:
             status2 = al_image_copy(
@@ -295,7 +307,7 @@ process_image(struct al_camera *cam, AImage *image)
                     .width = cam->width,
                     .height = cam->height,
                     .stride = cam->width,
-                    .data = cam->yuv420p,
+                    .data = cam->yuv420p.data,
                     .format = AL_COLOR_FORMAT_YUV420P,
                 }),
                 &cam->image
@@ -308,7 +320,7 @@ process_image(struct al_camera *cam, AImage *image)
                     .width = cam->width,
                     .height = cam->height,
                     .stride = cam->width,
-                    .data = cam->yuv420sp,
+                    .data = cam->yuv420sp.data,
                     .format = AL_COLOR_FORMAT_YUV420SP,
                 }),
                 &cam->image
@@ -326,7 +338,7 @@ process_image(struct al_camera *cam, AImage *image)
                 y_pixel,
                 u_pixel,
                 v_pixel,
-                cam->rgba,
+                cam->rgba.data,
                 cam->image.width,
                 cam->image.height,
                 y_stride,
@@ -952,14 +964,10 @@ al_camera_free(struct al_camera *cam)
     if (cam->reader != NULL)
         AImageReader_delete(cam->reader);
     cam->reader = NULL;
-    free(cam->image.data);
-    cam->image.data = NULL;
-    free(cam->rgba);
-    cam->rgba = NULL;
-    free(cam->yuv420p);
-    cam->yuv420p = NULL;
-    free(cam->yuv420sp);
-    cam->yuv420sp = NULL;
+    al_image_free(&cam->image);
+    al_image_free(&cam->rgba);
+    al_image_free(&cam->yuv420sp);
+    al_image_free(&cam->yuv420p);
     free(cam->listener);
     cam->listener = NULL;
     if (cam->window != NULL)
@@ -1246,15 +1254,15 @@ al_camera_get_data(struct al_camera *cam, enum al_color_format format, void **da
             switch (cam->color_format) {
                 case COLOR_FormatYUV420Planar:
                     al_yuv_i420_to_nv12(
-                        cam->yuv420p,
-                        cam->yuv420sp,
+                        cam->yuv420p.data,
+                        cam->yuv420sp.data,
                         cam->width,
                         cam->height
                     );
-                    *data = cam->yuv420sp;
+                    *data = cam->yuv420sp.data;
                     return AL_OK;
                 case COLOR_FormatYUV420SemiPlanar:
-                    *data = cam->yuv420sp;
+                    *data = cam->yuv420sp.data;
                     return AL_OK;
                 default:
                     break;
@@ -1263,16 +1271,16 @@ al_camera_get_data(struct al_camera *cam, enum al_color_format format, void **da
         case AL_COLOR_FORMAT_YUV420P:
             switch (cam->color_format) {
                 case COLOR_FormatYUV420Planar:
-                    *data = cam->yuv420p;
+                    *data = cam->yuv420p.data;
                     return AL_OK;
                 case COLOR_FormatYUV420SemiPlanar:
                     al_yuv_nv12_to_i420(
-                        cam->yuv420sp,
-                        cam->yuv420p,
+                        cam->yuv420sp.data,
+                        cam->yuv420p.data,
                         cam->width,
                         cam->height
                     );
-                    *data = cam->yuv420p;
+                    *data = cam->yuv420p.data;
                     return AL_OK;
                 default:
                     break;
@@ -1292,7 +1300,7 @@ al_camera_get_rgba(struct al_camera *cam, void **data)
         return AL_OK;
     }
     cam->read = false;
-    *data = cam->rgba;
+    *data = cam->rgba.data;
     return AL_OK;
 }
 
