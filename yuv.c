@@ -93,16 +93,31 @@ al_yuv_to_rgba(
     assert(output != NULL);
     assert(y_pixel_stride == 1);
     assert(uv_pixel_stride == 1 || uv_pixel_stride == 2);
-    for (size_t i = 0; i < height; i++) {
-        uint32_t *out = output + i * width;
-        const uint8_t *y = y_data + i * y_stride;
-        const uint8_t *u = u_data + (i / 2) * uv_stride;
-        const uint8_t *v = v_data + (i / 2) * uv_stride;
-        for (size_t j = 0; j < width / 2; j++) {
-            *out++ = yuv_to_rgb(*y++, *u, *v);
-            *out++ = yuv_to_rgb(*y++, *u, *v);
-            u += uv_pixel_stride;
-            v += uv_pixel_stride;
+    if (uv_pixel_stride == 1) {
+        for (size_t i = 0; i < height; i++) {
+            uint32_t *out = output + i * width;
+            const uint8_t *y = y_data + i * y_stride;
+            const uint8_t *u = u_data + (i / 2) * uv_stride;
+            const uint8_t *v = v_data + (i / 2) * uv_stride;
+            for (size_t j = 0; j < width / 2; j++) {
+                *out++ = yuv_to_rgb(*y++, *u, *v);
+                *out++ = yuv_to_rgb(*y++, *u, *v);
+                u += 1;
+                v += 1;
+            }
+        }
+    } else if (uv_pixel_stride == 2) {
+        for (size_t i = 0; i < height; i++) {
+            uint32_t *out = output + i * width;
+            const uint8_t *y = y_data + i * y_stride;
+            const uint8_t *u = u_data + (i / 2) * uv_stride;
+            const uint8_t *v = v_data + (i / 2) * uv_stride;
+            for (size_t j = 0; j < width / 2; j++) {
+                *out++ = yuv_to_rgb(*y++, *u, *v);
+                *out++ = yuv_to_rgb(*y++, *u, *v);
+                u += 2;
+                v += 2;
+            }
         }
     }
 }

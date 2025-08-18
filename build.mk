@@ -32,6 +32,8 @@ CFLAGS+=        -fno-strict-aliasing
 CFLAGS+=        -fno-strict-overflow
 CFLAGS+=        -fpic
 CFLAGS+=        -fwrapv
+CFLAGS+=        -Rpass=loop-vectorize
+CFLAGS+=        -Rpass-analysis=loop-vectorize
 # LDFLAGS+=       -fuse-ld=lld
 
 ifeq ("$(DEBUG)","0")
