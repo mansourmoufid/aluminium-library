@@ -67,10 +67,12 @@ OBJS:=	\
 	build/$(TARGET)/$(PLATFORM)-yuv.o
 
 build/$(TARGET)/libal.dylib: $(OBJS)
-	$(CC) -bundle -o build/$(TARGET)/libal.dylib $(OBJS) $(LDFLAGS)
+	$(CC) -bundle -o $@ $(OBJS) $(LDFLAGS)
+	$(STRIP) -x $@
 
 build/$(TARGET)/libal.so: $(OBJS)
-	$(CC) -shared -o build/$(TARGET)/libal.so $(OBJS) $(LDFLAGS)
+	$(CC) -shared -o $@ $(OBJS) $(LDFLAGS)
+	$(STRIP) --strip-unneeded $@
 
 .PHONY: so
 so: build/$(TARGET)/libal$(SOEXT)

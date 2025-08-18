@@ -7,6 +7,7 @@ CXX?=           clang++
 CPP?=           $(CC) -E
 LD?=            $(CC)
 RANLIB?=        ranlib
+STRIP?=         strip
 
 ifeq ("$(TARGET)","")
 TARGET:=        $(shell $(CC) $(CFLAGS) -dumpmachine | sed -e 's/[0-9.]*$$//')
@@ -81,6 +82,7 @@ SDKROOT:=       "$(shell xcrun --sdk macosx --show-sdk-path)"
 AR:=            "$(shell xcrun --sdk macosx --find $(AR))"
 CC:=            "$(shell xcrun --sdk macosx --find $(CC))"
 LD:=            "$(shell xcrun --sdk macosx --find $(CC))"
+STRIP:=         "$(shell xcrun --sdk macosx --find $(STRIP))"
 CPPFLAGS+=      -isysroot $(SDKROOT)
 CFLAGS+=        --sysroot=$(SDKROOT)
 LDFLAGS+=       --sysroot=$(SDKROOT)
@@ -100,6 +102,7 @@ SDKROOT:=       "$(shell xcrun --sdk iphoneos --show-sdk-path)"
 AR:=            "$(shell xcrun --sdk iphoneos --find $(AR))"
 CC:=            "$(shell xcrun --sdk iphoneos --find $(CC))"
 LD:=            "$(shell xcrun --sdk iphoneos --find $(CC))"
+STRIP:=         "$(shell xcrun --sdk iphoneos --find $(STRIP))"
 CPPFLAGS+=      -isysroot $(SDKROOT)
 CFLAGS+=        --sysroot=$(SDKROOT)
 LDFLAGS+=       --sysroot=$(SDKROOT)
