@@ -18,7 +18,9 @@
  */
 
 #include <assert.h>
+#include <inttypes.h> // PRIxPTR
 #include <signal.h>
+#include <stdint.h> // uintptr_t
 #include <string.h> // strsignal
 
 #include <CoreFoundation/CFString.h>
@@ -64,9 +66,9 @@ catch_fatal_signals(void)
     for (size_t i = 0; i < sizeof signals / sizeof (signals[0]); i++) {
         if (signal(signals[i], &fatal_signal_handler) == SIG_ERR) {
             DEBUG(
-                "signal(%s, %p) = SIG_ERR",
+                "signal(%s, %#" PRIxPTR ") = SIG_ERR",
                 strsignal(signals[i]),
-                &fatal_signal_handler
+                (uintptr_t) &fatal_signal_handler
             );
         }
     }
