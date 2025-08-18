@@ -23,9 +23,11 @@ ASFLAGS+=       -fintegrated-as
 CPPFLAGS+=      -D_POSIX_C_SOURCE=200809L
 CPPFLAGS+=      -D_FORTIFY_SOURCE=1
 CFLAGS+=        -std=c11
+CFLAGS+=        -fexceptions
 CFLAGS+=        -fno-builtin
 CFLAGS+=        -fno-common
 CFLAGS+=        -fno-delete-null-pointer-checks
+CFLAGS+=        -fno-omit-frame-pointer
 CFLAGS+=        -fno-strict-aliasing
 CFLAGS+=        -fno-strict-overflow
 CFLAGS+=        -fpic
