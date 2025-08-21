@@ -709,11 +709,13 @@ al_camera_new(
     assert(index <= NSUIntegerMax);
     (void) width;
     (void) height;
+    enum al_status ret = AL_ERROR;
 
     errno = 0;
     *cam = calloc(1, sizeof (struct al_camera));
     if (*cam == NULL) {
         DEBUG("calloc: errno=%i [%s]", errno, strerror(errno));
+        ret = AL_NOMEMORY;
         goto error0;
     }
 
@@ -806,7 +808,8 @@ al_camera_new(
     }
     */
 
-    return AL_OK;
+    ret = AL_OK;
+    return ret;
 
 error11:
     if ((*cam)->sample_buffer != NULL)
@@ -844,7 +847,7 @@ error1:
     free(*cam);
     *cam = NULL;
 error0:
-    return AL_ERROR;
+    return ret;
 }
 
 void

@@ -26,6 +26,7 @@ enum al_status {
     AL_OK = 0,
     AL_ERROR = 1,
     AL_NOTIMPLEMENTED = 2,
+    AL_NOMEMORY = 3,
 };
 
 static inline
@@ -39,6 +40,8 @@ al_status_string(enum al_status status)
             return "AL_ERROR";
         case AL_NOTIMPLEMENTED:
             return "AL_NOTIMPLEMENTED";
+        case AL_NOMEMORY:
+            return "AL_NOMEMORY";
     }
 }
 

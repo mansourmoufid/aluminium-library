@@ -58,6 +58,7 @@ enum al_status {
     AL_OK = 0,
     AL_ERROR = 1,
     AL_NOTIMPLEMENTED = 2,
+    AL_NOMEMORY = 3,
 };
 
 enum al_color_format {
@@ -118,6 +119,8 @@ enum al_status al_image_copy(const struct al_image *, struct al_image *);
 
 al.OK = 0
 al.ERROR = 1
+al.NOTIMPLEMENTED = 2
+al.NOMEMORY = 3
 
 al.COLOR_FORMAT_UNKNOWN = 0
 al.COLOR_FORMAT_YUV420SP = 1

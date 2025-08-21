@@ -74,7 +74,7 @@ al_image_alloc(struct al_image *x)
     void *data = NULL;
     if (posix_memalign(&data, 32, size) != 0) {
         DEBUG("posix_memalign: errno=%i [%s]", errno, strerror(errno));
-        return AL_ERROR;
+        return AL_NOMEMORY;
     }
     x->data = data;
     return AL_OK;

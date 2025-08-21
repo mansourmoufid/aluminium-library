@@ -794,6 +794,7 @@ al_camera_new(
     size_t height
 ) {
     assert(cam != NULL);
+    enum al_status ret = AL_ERROR;
 
     if (_sdk < 24)
         goto error0;
@@ -802,6 +803,7 @@ al_camera_new(
     *cam = calloc(1, sizeof (struct al_camera));
     if (*cam == NULL) {
         DEBUG("calloc: errno=%i [%s]", errno, strerror(errno));
+        ret = AL_NOMEMORY;
         goto error0;
     }
 
@@ -816,6 +818,7 @@ al_camera_new(
     );
     if ((*cam)->availability_callbacks == NULL) {
         DEBUG("calloc: errno=%i [%s]", errno, strerror(errno));
+        ret = AL_NOMEMORY;
         goto error1;
     }
     (*cam)->availability_callbacks->context = *cam;
@@ -846,6 +849,7 @@ al_camera_new(
     );
     if ((*cam)->state_callbacks == NULL) {
         DEBUG("calloc: errno=%i [%s]", errno, strerror(errno));
+        ret = AL_NOMEMORY;
         goto error5;
     }
     (*cam)->state_callbacks->context = *cam;
@@ -867,6 +871,7 @@ al_camera_new(
     );
     if ((*cam)->session_callbacks == NULL) {
         DEBUG("calloc: errno=%i [%s]", errno, strerror(errno));
+        ret = AL_NOMEMORY;
         goto error8;
     }
     // (*cam)->session_callbacks->context = *cam;
@@ -902,7 +907,8 @@ al_camera_new(
     // (*cam)->image.stride = _al_calc_next_multiple((*cam)->width, 32);
     (*cam)->image.stride = (*cam)->width;
 
-    return AL_OK;
+    ret = AL_OK;
+    return ret;
 
 error10:
     (void) ACameraCaptureSession_abortCaptures((*cam)->session);
@@ -941,7 +947,7 @@ error1:
     free(*cam);
     *cam = NULL;
 error0:
-    return AL_ERROR;
+    return ret;
 }
 
 void
@@ -1352,10 +1358,10 @@ al_camera_set_stride(struct al_camera *cam, size_t stride)
     }
     if (size > 0)
         data = realloc(cam->image.data, size);
-    if (data != NULL) {
-        cam->image.data = data;
-        cam->image.stride = stride;
-    }
+    if (data == NULL)
+        return AL_NOMEMORY;
+    cam->image.data = data;
+    cam->image.stride = stride;
     return AL_OK;
 }
 
