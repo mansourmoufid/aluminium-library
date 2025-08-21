@@ -279,7 +279,13 @@ al_image_copy(const struct al_image *src, struct al_image *dst)
     }
 }
 
-#if defined(DEBUG)
+#if defined(TEST)
+
+#include <stdint.h> // uint8_t
+#include <stdlib.h> // calloc
+
+#include "test.h"
+
 int
 main(void)
 {
@@ -299,33 +305,15 @@ main(void)
         .width = x.height,
         .height = x.width,
         .stride = x.height,
-        .data = calloc(x.height, x.width),
+        .data = calloc(x.height, x.stride * sizeof (uint8_t)),
     };
     _al_dump(&x);
-    assert(al_image_rotate(&x, &y, 90) == AL_OK);
+    enum al_status status = al_image_rotate(&x, &y, 90);
     _al_dump(&y);
+    dump_status(status);
+    assert(status == AL_OK);
+
     return 0;
 }
+
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

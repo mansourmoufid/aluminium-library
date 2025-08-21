@@ -50,9 +50,30 @@ build/$(TARGET)/image.o: image.c
 	mkdir -p build/$(TARGET)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -O3 -c $< -o $@
 
+TESTS:= \
+	build/$(TARGET)/test-image \
+	build/$(TARGET)/test-yuv
+
+$(TESTS): al.h
+
+build/$(TARGET)/test-image: image.c
+	mkdir -p build/$(TARGET)
+	$(CC) $(CPPFLAGS) -DTEST $(CFLAGS) $< -o $@
+
 build/$(TARGET)/test-yuv: yuv.c
 	mkdir -p build/$(TARGET)
-	$(CC) $(CPPFLAGS) -DDEBUG $(CFLAGS) -O3 $< -o $@
+	$(CC) $(CPPFLAGS) -DTEST $(CFLAGS) $< -o $@
+
+.PHONY: clean-test
+clean-test:
+	rm -f $(TESTS)
+
+.PHONY: test
+test: $(TESTS) al.py
+	for x in $(TESTS); do \
+		./$$x; \
+	done
+	$(PYTHON) al.py
 
 OBJS:=	\
 	build/$(TARGET)/camera.o \
@@ -65,6 +86,8 @@ OBJS:=	\
 	build/$(TARGET)/permissions.o \
 	build/$(TARGET)/yuv.o \
 	build/$(TARGET)/$(PLATFORM)-yuv.o
+
+$(OBJS): al.h
 
 build/$(TARGET)/libal.dylib: $(OBJS)
 	$(CC) -bundle -o $@ $(OBJS) $(LDFLAGS)
@@ -92,17 +115,13 @@ check:
 	mypy *.py
 	luacheck *.lua
 
-.PHONY: test
-test: al.py
-	$(PYTHON) al.py
-
 .PHONY: cleanup
 cleanup:
 	"$(MAKE)" -f android/Makefile cleanup
 	"$(MAKE)" -f darwin/Makefile cleanup
 
 .PHONY: clean
-clean: cleanup
+clean: cleanup clean-tests
 	"$(MAKE)" -f android/Makefile clean
 	"$(MAKE)" -f darwin/Makefile clean
 	rm -rf .mypy_cache

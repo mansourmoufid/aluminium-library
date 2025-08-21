@@ -28,6 +28,20 @@ enum al_status {
     AL_NOTIMPLEMENTED = 2,
 };
 
+static inline
+const char *
+al_status_string(enum al_status status)
+{
+    switch (status) {
+        case AL_OK:
+            return "AL_OK";
+        case AL_ERROR:
+            return "AL_ERROR";
+        case AL_NOTIMPLEMENTED:
+            return "AL_NOTIMPLEMENTED";
+    }
+}
+
 enum al_color_format {
     AL_COLOR_FORMAT_UNKNOWN = 0,
     AL_COLOR_FORMAT_YUV420SP = 1,

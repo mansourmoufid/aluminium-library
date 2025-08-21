@@ -210,7 +210,13 @@ al_yuv_i420_to_nv12(
     }
 }
 
-#if defined(DEBUG)
+#if defined(TEST)
+
+#include <stdint.h> // uint8_t
+#include <string.h> // memcmp, memset
+
+#include "test.h"
+
 int
 main(void)
 {
@@ -233,12 +239,15 @@ main(void)
         22, 24,
     };
     uint8_t buffer[32];
+
     memset(buffer, 0, sizeof(buffer));
-    al_nv12_to_i420(nv12, buffer, 4, 4);
+    al_yuv_nv12_to_i420(nv12, buffer, 4, 4);
     assert(memcmp(buffer, i420, sizeof(i420)) == 0);
     memset(buffer, 0, sizeof(buffer));
-    al_i420_to_nv12(i420, buffer, 4, 4);
+    al_yuv_i420_to_nv12(i420, buffer, 4, 4);
     assert(memcmp(buffer, nv12, sizeof(nv12)) == 0);
+
     return 0;
 }
+
 #endif
