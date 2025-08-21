@@ -72,7 +72,7 @@ enum al_camera_facing {
     AL_CAMERA_FACING_BACK = 1,
 };
 
-void init(void);
+void al_init(void);
 
 extern const char *const copyright;
 extern const char *const platform;

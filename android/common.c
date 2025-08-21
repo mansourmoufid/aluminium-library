@@ -189,7 +189,7 @@ catch_fatal_signals(void)
 
 __attribute__((constructor))
 void
-init(void)
+al_init(void)
 {
     catch_fatal_signals();
 }

@@ -76,7 +76,7 @@ catch_fatal_signals(void)
 
 __attribute__((constructor))
 void
-init(void)
+al_init(void)
 {
     _al_encoding = CFStringGetSystemEncoding();
     DEBUG("_al_encoding = %s", _cfstringencoding_string(_al_encoding));
