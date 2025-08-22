@@ -110,9 +110,9 @@ install:
 
 .PHONY: check
 check:
-	pyflakes *.py
-	pycodestyle *.py
-	mypy *.py
+	find . -name '*.py' | xargs pyflakes
+	find . -name '*.py' | xargs pycodestyle
+	find . -name '*.py' | xargs mypy *.py
 	luacheck *.lua
 
 .PHONY: cleanup
