@@ -115,6 +115,11 @@ check:
 	find . -name '*.py' | xargs mypy *.py
 	luacheck *.lua
 
+.PHONY: docs
+docs:
+	$(MAKE) -f darwin/Makefile so
+	LIBAL_LIBRARY_PATH=./build/arm64-apple-darwin pdoc python/libal -o docs/python/
+
 .PHONY: cleanup
 cleanup:
 	"$(MAKE)" -f android/Makefile cleanup
