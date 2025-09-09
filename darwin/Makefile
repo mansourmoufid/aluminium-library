@@ -7,7 +7,6 @@ PLATFORM:=	darwin
 TARGETS:= \
 	x86_64-apple-darwin \
 	arm64-apple-darwin \
-	armv7-apple-ios \
 	arm64-apple-ios
 # TARGETS:= arm64-apple-darwin
 
