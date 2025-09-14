@@ -93,6 +93,12 @@ al_image_free(struct al_image *x)
     x->format = AL_COLOR_FORMAT_UNKNOWN;
 }
 
+enum al_status
+al_image_convert(const struct al_image *src, struct al_image *dst)
+{
+    return AL_NOTIMPLEMENTED;
+}
+
 struct yuv {
     size_t width;
     size_t height;
