@@ -355,8 +355,8 @@ new_output(struct al_camera *cam)
 }
 
 static inline
-__attribute__((const))
 uint32_t
+__attribute__((const))
 argb_to_rgba(uint32_t x)
 {
     // BBGGRRAA → AABBGGRR
@@ -367,8 +367,8 @@ argb_to_rgba(uint32_t x)
 }
 
 static inline
-__attribute__((const))
 uint32_t
+__attribute__((const))
 bgra_to_rgba(uint32_t x)
 {
     // AARRGGBB → AABBGGRR

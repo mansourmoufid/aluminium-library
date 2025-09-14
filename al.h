@@ -57,7 +57,7 @@ enum al_camera_facing {
     AL_CAMERA_FACING_BACK = 1,
 };
 
-__attribute__((constructor)) void al_init(void);
+void __attribute__((constructor)) al_init(void);
 
 extern const char *const copyright;
 extern const char *const platform;

@@ -28,16 +28,16 @@
 #define SIZE_MAX_SQRT (((size_t) 1) << (8 * sizeof (size_t) / 2))
 
 static inline
-__attribute__((const))
 size_t
+__attribute__((const))
 _al_calc_next_multiple(size_t x, size_t n)
 {
     return (x / n + 1) * n;
 }
 
 static inline
-__attribute__((const))
 float
+__attribute__((const))
 _al_l2norm(float x, float y, float a, float b)
 {
     return sqrtf((x - a) * (x - a) + (y - b) * (y - b));
