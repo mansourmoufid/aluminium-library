@@ -91,6 +91,7 @@ struct al_camera {
 #define N_CAMERAS 64
 static struct al_camera *_al_cameras[N_CAMERAS] = {0};
 
+__attribute__((visibility("hidden")))
 @interface AlCameraController : NSObject
 @property(atomic) struct al_camera *camera;
 - (instancetype) initWithCamera: (struct al_camera *)cam;
@@ -186,6 +187,7 @@ get_device(struct al_camera *cam, NSUInteger index)
 }
 
 bool
+__attribute__((visibility("hidden")))
 _al_camera_have_authorization(void)
 {
     if (@available(iOS 7.0, macOS 10.14, *)) {
@@ -214,6 +216,7 @@ _al_camera_have_authorization(void)
 }
 
 void
+__attribute__((visibility("hidden")))
 _al_camera_request_authorization(void)
 {
     if (@available(iOS 7.0, macOS 10.14, *)) {
@@ -636,6 +639,7 @@ error0:
     return;
 }
 
+__attribute__((visibility("hidden")))
 @interface AlOutputDelegate<AVCaptureVideoDataOutputSampleBufferDelegate>
     : NSObject
 @property(atomic) struct al_camera *camera;

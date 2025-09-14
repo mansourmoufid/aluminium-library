@@ -38,6 +38,7 @@
     (((vImagePixelCount) 1) << (8 * sizeof(vImagePixelCount) / 2))
 
 enum al_status
+__attribute__((visibility("hidden")))
 _al_darwin_yuv_to_rgba(
     const CVImageBufferRef image_buffer,
     vImage_Buffer image_buffers[NUM_IMAGE_BUFFERS]

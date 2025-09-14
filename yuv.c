@@ -145,6 +145,7 @@ _al_debug_buffer(const uint8_t *buffer, size_t size)
  *                          V0V1V2V3
  */
 void
+__attribute__((visibility("hidden")))
 al_yuv_nv12_to_i420(
     const uint8_t *restrict nv12_data,
     uint8_t *restrict i420_data,
@@ -182,6 +183,7 @@ al_yuv_nv12_to_i420(
  *                          V0V1V2V3
  */
 void
+__attribute__((visibility("hidden")))
 al_yuv_i420_to_nv12(
     const uint8_t *restrict i420_data,
     uint8_t *restrict nv12_data,

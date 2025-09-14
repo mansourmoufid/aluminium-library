@@ -36,7 +36,8 @@ const char *const platform = "ios";
 const char *const platform = "darwin";
 #endif
 
-CFStringEncoding _al_encoding = kCFStringEncodingUTF8;
+CFStringEncoding _al_encoding __attribute__((visibility("hidden"))) =
+    kCFStringEncodingUTF8;
 
 static
 void
