@@ -30,7 +30,7 @@ jobs:
         distribution: 'temurin'
     - name: Setup Android SDK
       if: matrix.os == 'ubuntu-latest'
-      uses: android-actions/setup-android@v3
+      uses: android-actions/setup-android@v4
     - name: Set up Python
       if: matrix.os == 'ubuntu-latest'
       uses: actions/setup-python@v6
